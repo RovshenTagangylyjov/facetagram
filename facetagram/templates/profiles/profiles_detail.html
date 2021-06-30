@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Detail{% endblock %}
+{% block content %}
+{% include 'nav.html' %}
+<link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
+
+<section class="profile position-fixed d-flex flex-column p-3 bg-white me-5">
+    <figure class="mb-3 figure mx-auto">
+        <img src="{{user.get_avatar_url}}" alt="avatar" class="figure-img avatar img-fluid">
+        <figcaption class="figure-caption text-center">Avatar</figcaption>
+    </figure>
+    <div>
+        <div class="d-flex w-100 justify-content-evenly text-center mb-3 text-primary">
+            <div class="d-flex flex-column justify-content-center py-2 px-3 border border-2 border-primary rounded-3">
+                <h4>{{user.my_friend.count}}</h4>
+                <h5>Friends</h5>
+            </div>
+            <div class="d-flex flex-column justify-content-center py-2 px-3 border border-2 border-primary rounded-3">
+                <h4>{{user.post_set.count}}</h4>
+                <h5>Posts</h5>
+            </div>
+        </div>
+        <div class="d-flex">
+            <label class="fw-bold me-2" for="username">Username:</label>
+            <p>{{user}}</p>
+        </div>
+        {% if user.get_full_name %}
+        <div class="d-flex">
+            <label class="fw-bold me-2" for="Full Name">Full Name:</label>
+            <p>{{user.get_full_name}}</p>
+        </div>
+        {% endif %}
+        
+        {% if user.date_of_birth %}
+        <div class="d-flex">
+            <label class="fw-bold me-2" for="date_of_birth">Date of Birth:</label>
+            <p>{{user.date_of_birth}}</p>
+        </div>
+        <div class="d-flex">
+            <label class="fw-bold me-2" for="age">Age:</label>
+            <p>{{user.get_age}}</p>
+        </div>
+        {% endif %}
+        
+        {% if user.gender %}
+        <div class="d-flex">
+            <label class="fw-bold me-2" for="gender">Gender:</label>
+            <p>{{user.gender}}</p>
+        </div>
+        {% endif %}
+        
+        {% if user.country %}
+        <div class="d-flex">
+            <label class="fw-bold me-2" for="country">Country:</label>
+            <p>{{user.country}}</p>
+        </div>
+        {% endif %}
+        
+        {% if user.biography %}
+        <div class="d-flex flex-column">
+            <label class="fw-bold" for="biography">About Me:</label>
+            <p class="biography p-3">{{user.biography}}</p>
+        </div>
+        {% endif %}
+        
+    </div>
+    {% if user.pk == request.user.pk %}
+    <a href="{% url 'profiles:update' request.user.pk %}" class="btn btn-primary position-fixed bottom-0 end-0" style="margin-bottom: 7.5em; margin-right: 4em;">Edit</a>
+    {% endif %}
+</section>
+
+{% if user.pk == request.user.pk %}
+<div class="add-post position-fixed bottom-0 end-0 mb-3 me-5">
+    <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><i class="fas fa-plus big-plus fa-4x"></i></button>
+</div>
+
+<form method="POST" action="{% url 'posts:create' %}"  class="modal fade" id="add-post" tabindex="-1" aria-labelledby="add-post" aria-hidden="true" enctype="multipart/form-data">{% csrf_token  %}
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Post</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <figure class="figure post-image mb-3 d-none" id="post-figure">
+                    <div class="bg-image"></div>
+                    <div class="blur"></div>
+                    <img alt="post" id='post-img' class="position-absolute start-50 top-50 translate-middle">
+                </figure>
+                <div class="mb-3">
+                    <label class="fw-bold" for="image" class="col-form-label">Select Image:</label>
+                    <input type="file" class="form-control" name="image" accept="img/*" required id="post-input">
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold" for="location" class="col-form-label">Location:</label>
+                    <input type="text" class="form-control" name="location" maxlength="50">
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold" for="description" class="col-form-label">Description:</label>
+                    <textarea class="form-control" name="description"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Post</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endif %}
+
+{% if has_access %}
+<section class="posts d-flex flex-column ms-5 my-1 infinite-container">
+    {% for post in posts %}
+    <div class="post d-flex flex-column bg-white py-2 my-1 infinite-item" id="{{post.id}}">
+        <header class="container px-3">
+            <div class="row  align-items-center">
+                <div class="col-1 ps-3 pe-0">
+                    <a class="col-1 ms-1" href="{% url 'profiles:detail' post.user.pk %}">
+                        <img class="i-avatar fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
+                    </a>
+                </div>
+                <div class="col-9">
+                    <a class="name m-0 link-dark text-decoration-none h5" href="{% url 'profiles:detail' post.user.pk %}">{{post.user}}</a>
+                </div>
+                {% if user.pk == request.user.pk %}
+                <div class="col-2">
+                    <a href="{% url 'posts:update' post.id %}" class="btn btn-outline-success fas fa-pen" id="{{post.id}}"></a>
+                    <button class="btn btn-outline-danger fas fa-trash delete" id="{{post.id}}"></button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-1"></div>
+                {% if post.location %}
+                <p class="small col-10 mb-1">{{post.location}}</p>
+                {% else %}
+                <div class="mb-2"></div>
+                {% endif %}
+            </div>
+        </header>
+        <div class="breaker w-100 mb-2"></div>
+        <figure class="figure post-image" onclick="window.location='{% url 'posts:detail' post.pk %}'">
+            <div class="bg-image" style="background-image: url({{post.image.url}});"></div>
+            <div class="blur"></div>
+            <img src="{{post.image.url}}" alt="post" class="position-absolute start-50 top-50 translate-middle">
+        </figure>
+        <footer class="py-1 px-3 w-100">
+            <div class="d-flex justify-content-between">
+                <div class="thumbs">
+                    <i class="btn {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</i>
+                    <i class="btn {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</i>
+                </div>
+                <div>
+                    <a href="{% url 'posts:detail' post.pk %}" class="btn link-dark text-decoration-none">
+                        <small class="me-1 c{{post.id}}">{{post.get_comment_count}}</small>
+                        <i class="text-primary fas fa-comment-alt"></i>
+                    </a>
+                </div>
+            </div>  
+            <div class="breaker"></div>
+            <p class="description text-truncate px-3 mt-1 mb-0">{{post.description}}</p>
+        </footer>
+        <div class="input-group my-2 mx-4">
+            <input type="text" class="form-control comment-input{{post.id}}" placeholder="Comment" id="{{post.id}}">
+            <button type="submit" class="btn btn-outline-primary input-group-text comment-submit me-5 fas fa-paper-plane" id="{{post.id}}"></button>
+        </div>
+    </div>
+    <div class="pagination">
+        {% if page_obj.has_next %}
+        <a class="infinite-more-link" href="?page={{page_obj.next_page_number}}"></a>
+        {% endif %}
+    </div>
+    {% empty %}
+    <h5 class="text-center text-muted">No posts</h5>
+    {% endfor %}
+</section>
+{% else %}
+<h1 class="position-absolute top-50 text-primary translate-middle d-flex flex-column text-center" style="left:30%;">
+    <i class="fas fa-lock mb-2" style="font-size:5em;"></i>
+    <label>Private</label>
+</h1>
+{% endif %}
+<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'js/infinite.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        trashes = document.querySelectorAll('.delete');
+        trashes.forEach((trash) => {
+            trash.addEventListener('click', deletePost);
+        })
+        
+        deltePost = (event) => {
+            event.target.classList.add('listening');
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', "{% url 'posts:delete' %}", true);
+            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ id: event.target.id }));
+            document.getElementById(event.target.id).remove();
+        }
+        
+        sendRate = (event) => {
+            event.target.classList.add('listening');
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', "{% url 'posts:like_post' %}", true);
+            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            const thumbs = document.querySelectorAll('.p' + event.target.id);
+            if (event.target.classList.contains('like')) {
+                if (event.target.classList.contains('fas')) {
+                    event.target.classList.remove('fas', 'text-primary');
+                    event.target.classList.add('far');
+                    value = 0;
+                } else {
+                    event.target.classList.add('fas', 'text-primary');
+                    value = 1;
+                    if (thumbs[1].classList.contains('fas')) {
+                        thumbs[1].classList.remove('fas', 'text-danger');
+                    }
+                }
+            } else {
+                if (event.target.classList.contains('fas')) {
+                    event.target.classList.remove('fas', 'text-danger');
+                    event.target.classList.add('far');
+                    value = 0;
+                } else {
+                    event.target.classList.add('fas', 'text-danger');
+                    value = -1;
+                    if (thumbs[0].classList.contains('fas')) {
+                        thumbs[0].classList.remove('fas', 'text-primary');
+                    }
+                }
+            }
+            xhr.send(JSON.stringify({ id: event.target.id, value: value }));
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState != 4) return;
+                if (xhr.status == 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    thumbs[0].textContent = data['likes'];
+                    thumbs[1].textContent = data['dislikes'];
+                }
+            };
+        };
+        
+        document
+        .getElementById('post-input')
+        .addEventListener('change', (event) => {
+            figure = document.getElementById('post-figure');
+            figure.classList.remove('d-none');
+            img = figure.querySelector('#post-img');
+            img.src = URL.createObjectURL(event.target.files[0]);
+        });
+        
+        trashes = document.querySelectorAll('.delete');
+        trashes.forEach((trash) => {
+            trash.addEventListener('click', deletePost);
+        })
+        
+        rates = document.querySelectorAll('.rate');
+        rates.forEach((rate) => {
+            rate.addEventListener('click',  sendRate);
+        });
+        
+        commentBtns = document.querySelectorAll('.comment-submit');
+        commentBtns.forEach(btn => {
+            btn.addEventListener('click', sendComment)
+        });
+        
+        var infinite = new Waypoint.Infinite({
+            element: $('.infinite-container')[0],
+            offset: 'bottom-in-view',
+            onBeforePageLoad: () => {
+                rates = document.querySelectorAll('.rate');
+                rates.forEach(rate => {
+                    rate.removeEventListener('click', sendRate);
+                })  
+                
+                commentBtns = document.querySelectorAll('.comment-submit');
+                commentBtns.forEach(btn => {
+                    btn.removeEventListener('click', sendComment);
+                })
+                
+                trashes = document.querySelectorAll('.delete');
+                trashes.forEach((trash) => {
+                    trash.removeEventListener('click', deletePost);
+                })
+
+            },
+            onAfterPageLoad: () => {
+                
+                rates = document.querySelectorAll('.rate');
+                rates.forEach(rate => {
+                    rate.addEventListener('click', sendRate);
+                })  
+                
+                commentBtns = document.querySelectorAll('.comment-submit');
+                commentBtns.forEach(btn => {
+                    btn.addEventListener('click', sendComment);
+                })
+                
+                trashes = document.querySelectorAll('.delete');
+                trashes.forEach((trash) => {
+                    trash.addEventListener('click', deletePost);
+                })
+                
+            },
+        })
+        
+    });
+    
+</script>
+{% endblock %}

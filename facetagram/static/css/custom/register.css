@@ -1,0 +1,26 @@
+.greating {
+	font-size: 2.5em;
+}
+form {
+	box-shadow: 1px 1px 10px 1px rgba(0, 0, 0, 0.3);
+	width: fit-content;
+	border-radius: 1rem;
+	margin-top: 3em;
+}
+
+.row {
+	max-width: 20rem;
+}
+
+footer {
+	font-size: small;
+}
+
+@media (max-width: 576px) {
+	form {
+		position: absolute;
+		top: 0;
+		left: -1em;
+		width: 100vw;
+	}
+}

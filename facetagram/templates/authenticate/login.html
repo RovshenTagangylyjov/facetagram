@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login|facetagram{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/custom/register.css' %}">
+<div class="greating text-center mt-5 pt-5 w-50 text-primary text-uppercase m-auto">
+    <p>hey, welcome back!!! <br> please verify it's you!</p>
+</div>
+<form method="POST" class="d-flex flex-column align-items-center mx-auto py-3 px-5 position-relative">{% csrf_token %}
+    <div class="row mt-3">
+        <label for="username" class="form-label">Username</label>
+        <div class="input-group has-validation">
+            <i class="input-group-text far fa-user text-primary" id="username-icon"></i>
+            <input type="text" class="form-control" name="username" id="username" autocomplete="username" required autofocus value='{{form.username.value|default_if_none:""}}' aria-describedby="username-feedback username-icon">
+            <div class="invalid-feedback" id="username-feedback">
+                {{form.errors.username}}
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-group has-validation">
+            <i class="input-group-text fas fa-key text-primary" id="password-icon"></i>
+            <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password" aria-describedby="password-feedback password-icon">
+            <div class="invalid-feedback" id="password-feedback">
+                {{form.errors.password}}
+            </div>
+        </div>
+    </div>
+    <div class="row my-3">
+        <input type="submit" class="btn btn-primary" value="Login">
+    </div>
+    <footer class="position-absolute bottom-0 mb-1 w-100 text-center">Don't have an account yet? Please <a href="{% url 'authenticate:register' %}">Register</a>
+    </footer>
+</form>
+{% endblock %}

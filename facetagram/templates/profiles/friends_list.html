@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Search{% endblock %}
+{% block content %}
+{% include 'nav.html' %}
+<link rel="stylesheet" href="{% static 'css/custom/search_profile.css' %}">
+<section class="container-sm w-75 mx-auto rounded-3 my-3 users">
+    <form method="GET" class="d-flex justify-content-center position-sticky top-0 search bg-white border-0 border-bottom rounded-0 border-primary rounded-3">
+        <input class="form-control border-primary text-primary border-0" type="search" placeholder="Search" aria-label="Search" autocomplete="profile" name="search" value="{{request.GET.search|default_if_none:''}}" id="search">
+        <button class="btn btn-outline-primary px-2 ms-1 border-0" type="submit"><i class="fas fa-search" id="search-btn"></i></button>
+    </form>  
+    <ul class="mt-2 p-0 infinite-container" id="profiles">
+        {% for friendship in friendships %}
+        <li class="row my-2 p-3 border-bottom border-5 flex-column flex-md-row align-items-center infinite-item bg-white rounded-3" id="friend{{friendship.friend.id}}">
+            <div class="col-4">
+                <img src="{{friendship.friend.get_avatar_url}}" alt="avatar" class="avatar w-100 h-100">
+            </div>
+            <ul class="col d-flex flex-column justify-content-center list-unstyled">
+                <li class="d-flex mb-2 justify-content-center justify-content-md-start">
+                    <label for="username">Username:</label>
+                    <p class="m-0 ms-2 fw-bold">{{friendship.friend.username}}</p>
+                </li>
+                {% if friendship.friend.get_full_name %}
+                <li class="d-flex mb-2 justify-content-center justify-content-md-start">
+                    <label for="fullname">Fullname:</label>
+                    <p class="m-0 ms-2 fw-bold">{{friendship.friend.get_full_name}}</p>
+                </li>
+                {% endif %}
+                {% if friendship.friend.date_of_birth %}
+                <li class="d-flex mb-2 justify-content-center justify-content-md-start">
+                    <label for="date_of_birth">Date of Birth:</label>
+                    <p class="m-0 ms-2 fw-bold">{{friendship.friend.date_of_birth}}</p>
+                </li>
+                <li class="d-flex mb-2 justify-content-center justify-content-md-start">
+                    <label for="age">Age:</label>
+                    <p class="m-0 ms-2 fw-bold">{{friendship.friend.get_age}}</p>
+                </li>
+                {% endif %}
+                {% if friendship.friend.gender %}
+                <li class="d-flex mb-2 justify-content-center justify-content-md-start">
+                    <label for="gender">Gender:</label>
+                    <p class="m-0 ms-2 fw-bold">{{friendship.friend.gender}}</p>
+                </li>
+                {% endif %}
+                <li class="d-flex align-items-center flex-column flex-md-row align-content-center w-100">
+                    <a href="{% url 'profiles:detail' friendship.friend.id %}" class="btn btn-primary">Detail</a>
+                    <button class="ms-md-2 btn btn-danger request end-friendship my-2 my-md-0" id="{{friendship.friend.id}}">End Friendship</button>
+                    <a href="{% url 'chat:chat' friendship.room_id %}" class="btn btn-primary fas fa-comment-alt ms-md-5"></a>
+                </li>
+            </ul>
+        </li>
+        <div class="pagination">
+            {% if page_obj.has_next %}
+            <a class="infinite-more-link" href="?page={{page_obj.next_page_number}}"></a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <h5 class="text-muted">No users are available</h5>
+        {% endfor %}        
+    </ul>
+</section>
+
+<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'js/infinite.min.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        
+        var infinite = new Waypoint.Infinite({
+            element: $('.infinite-container')[0],
+            offset: 'bottom-in-view',
+            onBeforePageLoad: () => {
+                
+            },
+            onAfterPageLoad: () => {
+                document.querySelectorAll('.request').forEach(btn => btn.addEventListener('click', event => {
+                    document.getElementById('friend'+event.target.id).remove();
+                    let xhr = new XMLHttpRequest();
+                    xhr.open('POST', "{% url 'profiles:friend_request' %}", true);
+                    xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.send(JSON.stringify({ profile_id: event.target.id, value: 'end-friendship' }));
+                }));
+                
+                document.getElementById('search').addEventListener('keyup', getProfiles);
+                document.getElementById('search-btn').addEventListener('click', getProfiles);
+            },
+        });
+        
+        document.querySelectorAll('.request').forEach(btn => btn.addEventListener('click', event => {
+            document.getElementById('friend'+event.target.id).remove();
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', "{% url 'profiles:friend_request' %}", true);
+            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ profile_id: event.target.id, value: 'end-friendship' }));
+        }));
+        document.querySelector('.friends').classList.add('current-page');
+        
+        getProfiles = () => {
+            search = document.getElementById('search');
+            console.log(search.value);
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', "{% url 'profiles:json-friend-search' %}", true);
+            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ search: search.value }));
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState != 4) return;
+                if (xhr.status == 200){
+                    data = JSON.parse(xhr.responseText);
+                    let profiles = document.getElementById('profiles');
+                    profiles.innerHTML = '';
+                    
+                    for(i in data){
+                        profile = '<li class="row my-2 p-3 border-bottom border-5 flex-column flex-md-row align-items-center"><div class="col-4"><img src="'+data[i]['avatar']+'" alt="avatar" class="avatar w-100 h-100"></div><ul class="col d-flex flex-column justify-content-center list-unstyled"><li class="d-flex mb-2 justify-content-center justify-content-md-start"><label for="username">Username:</label><p class="m-0 ms-2 fw-bold">'+data[i]['username']+'</p></li>';
+                            if( data[i]['first_name'] || data[i]['last_name']){
+                                full_name = data[i]['first_name'] + data[i]['last_name'];
+                                profile += '<li class="d-flex mb-2 justify-content-center justify-content-md-start"><label for="fullname">Fullname:</label><p class="m-0 ms-2 fw-bold">'+full_name+'</p></li>'
+                            }
+                            if (data[i]['date_of_birth']){
+                                profile += '<li class="d-flex mb-2 justify-content-center justify-content-md-start"><label for="date_of_birth">Date of Birth:</label><p class="m-0 ms-2 fw-bold">'+data[i]['date_of_birth']+'</p></li><li class="d-flex mb-2 justify-content-center justify-content-md-start"><label for="age">Age:</label><p class="m-0 ms-2 fw-bold">'+data[i]['age']+'</p></li>'
+                            }
+                            if (data[i]['gender']){
+                                profile += '<li class="d-flex mb-2 justify-content-center justify-content-md-start"><label for="gender">Gender:</label><p class="m-0 ms-2 fw-bold">'+data[i]['gender']+'</p></li>'
+                            }
+                            profile += '<li class="d-flex align-items-center flex-column flex-md-row align-content-center w-100"><a href="/profiles/'+data[i]['id']+'" class="btn btn-primary">Detail</a><btn class="ms-md-2 btn btn-danger request end-friendship mt-2 mt-md-0" id="'+data[i]['id']+'">End Friendship</btn>'
+                                profiles.innerHTML += profile;
+                            }
+                        }
+                    }
+                }
+                
+                document.getElementById('search').addEventListener('keyup', getProfiles);
+                document.getElementById('search-btn').addEventListener('click', getProfiles);
+                
+            })
+        </script>
+        
+        {% endblock %}

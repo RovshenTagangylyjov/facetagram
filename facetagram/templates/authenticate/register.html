@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}facetagram|registration{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/custom/register.css' %}">
+<form method="POST" class="d-flex flex-column align-items-center mx-auto p-3 position-relative">{% csrf_token %}
+    <div class="row mt-3">
+        <label for="email" class="form-label">Email</label>
+        <div class="input-group has-validation">
+            <i class="input-group-text far fa-envelope text-primary" id="email-icon"></i>
+            <input type="email" class="form-control" id="email" name="email" autocomplete="email" value='{{form.email.value|default_if_none:""}}' aria-describedby="email-feedback email-icon" required autofocus>
+            <div class="invalid-feedback" id="email-feedback">
+                {{form.errors.email}}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <label for="username" class="form-label">Username</label>
+        <div class="input-group has-validation">
+            <i class="input-group-text far fa-user text-primary" id="username-icon"></i>
+            <input type="text" class="form-control" id="username" name="username" autocomplete="username" value='{{form.username.value|default_if_none:""}}' aria-describedby="username-feedback username-icon" required>
+            <div class="invalid-feedback" id="username-feedback">
+                {{form.errors.username}}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-group has-validation">
+            <i class="input-group-text fas fa-key text-primary" id="password1-icon"></i>
+            <input type="password" class="form-control" id="password1" name="password1" autocomplete="new_password" aria-describedby="password1-feedback password1-icon" required>
+            <div class="invalid-feedback" id="password1-feedback">
+                {{form.errors.password}}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <label for="password2" class="form-label">Confirm Password</label>
+        <div class="input-group has-validation">
+            <i class="input-group-text fas fa-key text-primary" id="password2-icon"></i>
+            <input type="password" class="form-control" id="password2" name="password2" autocomplete="off" aria-describedby="password2-feedback password2-icon" required>
+            <div class="invalid-feedback" id="password2-feedback">
+                {{form.errors.password2}}
+            </div>
+        </div>
+    </div>
+    <div class="row my-3">
+        <input type="submit" class="btn btn-primary" value="Register">
+    </div>
+    <footer class="position-absolute bottom-0 mb-1 w-100 text-center">Already have an accaunt? Please <a href="{% url 'authenticate:login' %}">login</a>
+    </footer>
+</form>
+{% endblock %}

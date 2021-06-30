@@ -1,0 +1,18 @@
+body,
+html {
+	font-family: Roboto;
+	background-color: #e0e0e0;
+	color: #303030;
+}
+
+.user {
+	box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.25);
+}
+
+.avatar {
+	border-radius: 50%;
+}
+
+.search {
+	z-index: 1;
+}

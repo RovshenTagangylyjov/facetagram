@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Chat{% endblock %}
+{% load static %}
+{% block content %}
+{% include 'nav.html' %}
+<link rel="stylesheet" href="{% static 'css/custom/chat.css' %}">
+<div class="chat m-auto mt-1 bg-white container-sm">
+    <div class=" p-3 pb-0 w-100 h-100 messages">
+        {% for message in messages %}
+        {% if message.user == request.user %}
+        <div class="row justify-content-end gap-1 m-1  flex-nowrap float-end  message" id="{{message.id}}">
+            <div class="col-auto my-1">
+                <p class="my text bg-primary text-white py-1 px-2 fw-bold">{{message.text}}</p>
+            </div>
+            <div class="col-1">
+                <a href="{% url 'profiles:detail' request.user.id %}">
+                    <img src="{{ request.user.get_avatar_url }}" alt="avatar" class="avatar w-100 h-100">
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="row justify-content-start gap-1 m-1 flex-nowrap float-start message" id="{{message.id}}">
+            <div class="col-1 text-center">
+                <a href="{% url 'profiles:detail' friend.id %}">
+                    <img src="{{ friend.get_avatar_url }}" alt="avatar" class="avatar w-100 h-100">
+                </a>
+            </div>
+            <div class="col-auto">
+                <p class="my text bg-secondary text-white py-1 px-2 fw-bold">{{message.text}}</p>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    <div class="input-group position-sticky bottom-0 w-100 m-0">
+        <input type="text" class="form-control" placeholder="Type..." id="text" autofocus>
+        <button type="submit" class="btn btn-outline-primary input-group-text" id="send">
+            <i class="fas fa-arrow-alt-circle-right"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        sendText = () => {
+            text = document.getElementById('text');
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', "{% url 'chat:text' %}", true);
+            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ room_id: '{{room.room_id}}', text: text.value }));
+            text.value = '';
+        }
+        document.getElementById('send').addEventListener('click', sendText);
+        document.getElementById('text').addEventListener('keydown', (event) => {
+            if (event.key == 'Enter') sendText();
+        });
+        request = setInterval(() => {
+            messages = document.getElementsByClassName('message');
+            if (messages.length > 0){
+                latest_message = messages[messages.length-1].id
+            }else{
+                latest_message = -1
+            }
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', "{% url 'chat:get_text' %}", true);
+            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ room_id: '{{room.room_id}}', message: latest_message }));
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState != 4) return;
+                if (xhr.status == 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    if (Object.keys(data).length != 0){
+                        for (i in data){
+                            messages = document.querySelector('.messages')
+                            if (data[i].user_id == '{{request.user.id}}'){
+                                messages.innerHTML += '<div class="row justify-content-end gap-1 m-1  flex-nowrap float-end  message" id="'+data[i].id+'"><div class="col-auto my-1"><p class="my text bg-primary text-white py-1 px-2 fw-bold" id="text'+data[i].id+'"></p></div><div class="col-1"><a href="{% url 'profiles:detail' request.user.id %}"><img src="{{ request.user.get_avatar_url }}" alt="avatar" class="avatar w-100 h-100"></a></div></div>';
+                            }else{
+                                messages.innerHTML += '<div class="row justify-content-start gap-1 m-1 flex-nowrap float-start message" id="'+data[i].id+'"><div class="col-1 text-center"><a href="{% url 'profiles:detail' friend.id %}"><img src="{{ friend.get_avatar_url }}" alt="avatar" class="avatar w-100 h-100"></a></div><div class="col-auto"><p class="my text bg-secondary text-white py-1 px-2 fw-bold" id="text'+data[i].id+'"></p></div></div>'
+                            }
+                            messages.querySelector('#text'+data[i].id).textContent = data[i].text;
+                        }
+                    }
+                }
+            }
+        }, 1000)
+    })
+    
+</script>
+
+{% endblock %}

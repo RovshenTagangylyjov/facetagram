@@ -1,0 +1,39 @@
+body,
+html {
+	font-family: Roboto;
+	background-color: #e0e0e0;
+	color: #303030;
+}
+.chat {
+	width: 55%;
+	height: 85vh;
+	box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.25);
+	border-top-left-radius: 1em;
+	border-top-right-radius: 1em;
+}
+
+.chat > div:first-child {
+	overflow-y: scroll;
+}
+
+.chat .row {
+	width: 70%;
+}
+
+.chat .row * {
+	margin: 0;
+	padding: 0;
+}
+
+.chat .text {
+	border-radius: 5px;
+	text-align: justify;
+}
+
+.chat i {
+	font-size: 2em;
+}
+
+.avatar {
+	border-radius: 50%;
+}

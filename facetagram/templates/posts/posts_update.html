@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Detail {% endblock %}
+{% block content %}
+{% include 'nav.html' %}
+<link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
+<style>
+    body{
+        background-color: #ffffff;
+        height: 100vh;
+    }
+    .row{
+        width: 50em;
+    }
+</style>
+<form method="POST" enctype="multipart/form-data" class="container-sm d-flex flex-column align-items-center mx-auto mt-3">{% csrf_token %}
+    <div class="row justify-content-evenly">
+        <figure class="figure post-image mb-2">
+            <img src="{{form.image.value.url}}" alt="post" class="position-absolute start-50 top-50 translate-middle rounded-3" id="post-img">    
+        </figure>
+        <input type="file" name='image' class="form-control w-auto mt-2" id="post-input">
+    </div>
+    <div class="row mb-2">
+        <label for="location">Location:</label>
+        <input type="text" maxlength="50" class="form-control w-100" name="location" value="{{form.location.value|default_if_none:''}}">
+    </div>
+    <div class="row mb-2">
+        <label for="description">Description:</label>
+        <textarea name="description" id="description_id" cols="50" rows="7" class="form-control">{{form.description.value|default_if_none:''}}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary align-self-end">Save</button>
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document
+        .getElementById('post-input')
+        .addEventListener('change', (event) => {
+            img = document.querySelector('#post-img');
+            img.src = URL.createObjectURL(event.target.files[0]);
+        });
+    })
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+nav {
+	z-index: 10;
+	box-shadow: 1px 1px 2px 1px rgba(200, 200, 200, 1);
+	font-size: 1.8em;
+}
+
+nav .navbar-brand {
+	background: linear-gradient(
+		100deg,
+		blue 0%,
+		#408cfd 35%,
+		#f09433 40%,
+		#e6683c 50%,
+		#dc2743 65%,
+		#cc2366 80%,
+		#bc1888 100%
+	);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	font-weight: 600;
+	letter-spacing: 2px;
+	font-size: inherit;
+}
+
+nav .icon {
+	color: #0d6efd;
+}
+
+.current-page {
+	background-color: #0d6efd;
+	/* color: #ffffff; */
+	clip-path: circle();
+}
+.current-page a {
+	color: #ffffff;
+}
+.i-avatar {
+	border-radius: 50%;
+	width: 1.3em;
+	height: 1.3em;
+}
+
+.toast .avatar {
+	width: 3em;
+	height: 3em;
+	clip-path: circle();
+}

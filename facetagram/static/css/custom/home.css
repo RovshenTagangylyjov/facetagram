@@ -1,0 +1,34 @@
+.btn {
+  background: #0d6efd;
+  color: #ffffff;
+  border-color: #ffffff;
+  font-weight: bold;
+}
+
+.btn:hover {
+  color: #0d6efd;
+  background: #ffffff;
+}
+
+nav {
+  box-shadow: 1px 1px 10px black;
+}
+
+section {
+  margin-top: 10em;
+}
+
+section .text {
+  flex-basis: 50%;
+}
+
+section .text p {
+  line-height: 2rem;
+}
+
+section img {
+  flex-basis: 40%;
+  width: 40vw;
+  z-index: -1;
+  transform: translateY(-10%);
+}

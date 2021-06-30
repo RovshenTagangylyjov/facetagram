@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}facetagram{% endblock %}
+{% block content %}
+{% include 'nav.html' %}
+<style>
+    .fas{
+        width: 40px;
+    }
+    .avatar {
+        border-radius: 50%;
+        width: 10em;
+        height: 10em;
+    }
+
+
+</style>
+<form method="POST" class="container-sm my-5" enctype="multipart/form-data"> {% csrf_token %}
+    <div class="row justify-content-center flex-column flex-md-row">
+        <div class="col order-1 order-md-0">
+            <div class="row mb-3 flex-column align-items-center">
+                <label for="username" class="label text-capitalize">username:</label>
+                <div class="input-group">
+                    <i class="fas fa-user text-white bg-primary input-group-text"></i>
+                    <input type="text" class="form-control" name="username"
+                           value='{{form.username.value|default_if_none:""}}' maxlength="150" required
+                           placeholder="Type here...">
+                </div>
+            </div>
+            <div class="row mb-3 flex-column align-items-center">
+                <label for="first_name" class="label text-capitalize">first name:</label>
+                <div class="input-group">
+                    <i class="fas fa-id-card text-white bg-primary input-group-text"></i>
+                    <input type="text" class="form-control" value='{{form.first_name.value|default_if_none:""}}'
+                           name="first_name" maxlength="150" placeholder="Type here...">
+                </div>
+            </div>
+            <div class="row mb-3 flex-column align-items-center">
+                <label for="last_name" class="label text-capitalize">last name:</label>
+                <div class="input-group">
+                    <i class="fas fa-id-card text-white bg-primary input-group-text"></i>
+                    <input type="text" class="form-control" value='{{form.last_name.value|default_if_none:""}}'
+                           name="last_name" maxlength="150" placeholder="Type here...">
+                </div>
+            </div>
+            <div class="row mb-3 flex-column align-items-center">
+                <label for="email" class="label text-capitalize">email address:</label>
+                <div class="input-group">
+                    <i class="fas fa-envelope text-white bg-primary input-group-text"></i>
+                    <input type="email" class="form-control" value='{{form.email.value|default_if_none:""}}'
+                           name="email" maxlength="243" required placeholder="Type here...">
+                </div>
+            </div>
+        </div>
+        <div class="col order-0 order-md-1 mb-3 mb-md-0 me-md-5">
+            <div class="row justify-content-center">
+                <label for="avatar" class="label text-capitalize">Avatar:</label>
+                <figure class="figure">
+                    <img src="{{request.user.get_avatar_url}}" alt="avatar" class="avatar figure-img d-block mx-auto"
+                         style="max-width: 13.9em;" id="avatar">
+                </figure>
+                <input type="file" class="form-control file-input" name="avatar" accept="img/*" style="width:50%"
+                       id="avatar-input">
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3 justify-content-center flex-column flex-md-row">
+        <div class="col">
+            <div class="row mb-3 flex-column align-items-center">
+                <label for="country" class="label text-capitalize">country:</label>
+                <div class="input-group">
+                    <i class="fas fa-city text-white bg-primary input-group-text"></i>
+                    <input type="text" class="form-control" value='{{form.country.value|default_if_none:""}}'
+                           name="country" maxlength="150" placeholder="Type here...">
+                </div>
+            </div>
+            <div class="row mb-3 flex-column align-items-center">
+                <label for="date_of_birth" class="label text-capitalize">date of birth:</label>
+                <div class="input-group">
+                    <i class="fas fa-birthday-cake text-white bg-primary input-group-text"></i>
+                    <input type="date" class="form-control" value='{{form.date_of_birth.value|date:"Y-m-d"}}'
+                           name="date_of_birth">
+                </div>
+            </div>
+            <div class="row mb-3 flex-column align-items-center">
+                <label for="gender" class="label text-capitalize">gender:</label>
+                <div class="input-group">
+                    <i class="fas fa-male text-white bg-primary input-group-text"></i>
+                    <select name="gender" id="gender_id" class="form-select">
+                        {% for option in form.gender %}
+                        {{option}}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-2 me-md-5">
+            <label for="biography" class="label text-capitalize">biography:</label>
+            <textarea name="biography" id="biography_id" cols="35" rows="8" class="form-control w-100 h-100"
+                      maxlength="10000" placeholder="Type here..." style="max-height: 12em;">{{form.biography.value|default_if_none:""}}</textarea>
+        </div>
+    </div>
+    <div class="row justify-content-between me-5 flex-wrap">
+        <div class="col-3">
+            <label class="label">Private:</label>
+            <input type="checkbox" name="is_private" class="checkbox" {% if form.is_private.value == True %}checked{% endif %}>
+        </div>
+        <div class="btn-group col-3" role="group">
+            <a class="btn btn-danger" href="{% url 'profiles:detail' user.pk %}">Cancel</a>
+            <button class="btn btn-primary px-3" type="submit">Save</button>
+        </div>
+    </div>
+
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('avatar-input').addEventListener('change', event => {
+            document.getElementById('avatar').src = URL.createObjectURL(event.target.files[0]);
+        })
+    })
+
+
+</script>
+{% endblock %}
