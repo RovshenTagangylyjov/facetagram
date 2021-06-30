@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
+from helpers.image_compression import get_compressed_image_content
 
 
 class Post(models.Model):
@@ -22,6 +23,11 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('posts:detail', args=[str(self.pk)])
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            self.image = get_compressed_image_content(self.image, [1024, 720])
+        super().save(*args, **kwargs)
 
 
 class Comment(models.Model):
