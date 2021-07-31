@@ -26,7 +26,7 @@ SECRET_KEY = "+#9u-g^!*sc+(33#=v62t-zejm4qms90lh-)s!ir#_$y)g$c#"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["myfacetagram.herokuapp.com"]
+ALLOWED_HOSTS = ["myfacetagram.herokuapp.com", "127.0.0.1"]
 
 
 # Application definition
@@ -82,14 +82,21 @@ WSGI_APPLICATION = 'facetagram.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'facetagram',
+#         'USER': "rovshen",
+#         'PASSWORD': "@Adalat123123",
+#         'HOST': 'localhost',
+#         'PORT': 3306,
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'facetagram',
-        'USER': "rovshen",
-        'PASSWORD': "@Adalat123123",
-        'HOST': 'localhost',
-        'PORT': 3306,
+    'defaults': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 

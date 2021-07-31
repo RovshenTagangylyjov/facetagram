@@ -1,0 +1,1 @@
+web: gunicorn facetagram.wsgi --log-file -
