@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'facetagram.wsgi.application'
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': 'facetagram',
 #         'USER': "rovshen",
-#         'PASSWORD': "@Adalat123123",
+#         'PASSWORD': "",
 #         'HOST': 'localhost',
 #         'PORT': 3306,
 #     }
@@ -101,6 +101,19 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('POSTGRES_DB'),
+#         'USER': os.getenv('POSTGRES_USER'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+#         'HOST': os.getenv('POSTGRES_HOST'),
+#         'PORT': os.getenv('POSTGRES_PORT')
+#     }
+# }
+ import dj_database_url
+ db_from_env = dj_database_url.config(conn_max_age=600)
+ DATABASE['default'].update(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
