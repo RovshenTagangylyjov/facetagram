@@ -26,7 +26,7 @@ SECRET_KEY = "+#9u-g^!*sc+(33#=v62t-zejm4qms90lh-)s!ir#_$y)g$c#"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["myfacetagram.herokuapp.com"]
 
 
 # Application definition
@@ -86,9 +86,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'facetagram',
-        'USER': "mysql",
-        'PASSWORD': "mysql",
-        'HOST': '127.0.0.1',
+        'USER': "rovshen",
+        'PASSWORD': "@Adalat123123",
+        'HOST': 'localhost',
         'PORT': 3306,
     }
 }
