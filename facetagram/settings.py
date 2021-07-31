@@ -94,7 +94,7 @@ WSGI_APPLICATION = 'facetagram.wsgi.application'
 # }
 
 DATABASES = {
-    'defaults': {
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
