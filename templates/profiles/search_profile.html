@@ -68,6 +68,38 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        sendRequests = () => {
+            document.querySelectorAll('.request').forEach(btn => btn.addEventListener('click', event => {
+                let value;
+                console.log('hello')
+                console.log(event.target)
+                if (event.target.classList.contains('send')){
+                    value = 'send';
+                    event.target.classList.remove('send', 'btn-primary');
+                    event.target.classList.add('cancel', 'btn-danger');
+                    event.target.textContent = 'Cancel Friend Request';
+                } else if(event.target.classList.contains('end-friendship')){
+                    value = 'end-friendship';
+                    event.target.classList.add('send', 'btn-primary');
+                    event.target.classList.remove('end-friendship', 'btn-danger');
+                    event.target.textContent = 'Send Friend Request'
+                }
+                else{
+                    value = 'cancel';
+                    event.target.classList.add('send', 'btn-primary');
+                    event.target.classList.remove('cancel', 'btn-danger');
+                    event.target.textContent = 'Send Friend Request';
+                }
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', "{% url 'profiles:friend_request' %}", true);
+                xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ profile_id: event.target.id, value: value }));
+            }));
+        };
+        
+        sendRequests();
+
         var infinite = new Waypoint.Infinite({
             element: $('.infinite-container')[0],
             offset: 'bottom-in-view',
@@ -75,32 +107,7 @@
                 
             },
             onAfterPageLoad: () => {
-                document.querySelectorAll('.request').forEach(btn => btn.addEventListener('click', event => {
-                    let value;
-                    console.log(event.target)
-                    if (event.target.classList.contains('send')){
-                        value = 'send';
-                        event.target.classList.remove('send', 'btn-primary');
-                        event.target.classList.add('cancel', 'btn-danger');
-                        event.target.textContent = 'Cancel Friend Request';
-                    } else if(event.target.classList.contains('end-friendship')){
-                        value = 'end-friendship';
-                        event.target.classList.add('send', 'btn-primary');
-                        event.target.classList.remove('end-friendship', 'btn-danger');
-                        event.target.textContent = 'Send Friend Request'
-                    }
-                    else{
-                        value = 'cancel';
-                        event.target.classList.add('send', 'btn-primary');
-                        event.target.classList.remove('cancel', 'btn-danger');
-                        event.target.textContent = 'Send Friend Request';
-                    }
-                    let xhr = new XMLHttpRequest();
-                    xhr.open('POST', "{% url 'profiles:friend_request' %}", true);
-                    xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.send(JSON.stringify({ profile_id: event.target.id, value: value }));
-                }));
+                sendRequests();
                 document.getElementById('search').addEventListener('keyup', getProfiles);
                 document.getElementById('search-btn').addEventListener('click', getProfiles);
             },
