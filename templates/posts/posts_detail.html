@@ -1,161 +1,141 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}  Detail {% endblock %}
+{% block title %}Detail{% endblock %}
 {% block content %}
-{% include 'nav.html' %}
 <link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
-<section class="detail posts d-flex flex-column mx-auto w-75 my-1">
-    <div class="post d-flex flex-column bg-white py-2 my-1" id="{{post.id}}">
-        <header class="container px-3">
-            <div class="row  align-items-center">
-                <div class="col-1 ps-3 pe-0">
-                    <a class="col-1 ms-1" href="{% url 'profiles:detail' post.user.pk %}">
-                        <img class="i-avatar fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
-                    </a>
-                </div>
-                <div class="col-9">
-                    <a class="name m-0 link-dark text-decoration-none h5" href="{% url 'profiles:detail' post.user.pk %}">{{post.user}}</a>
-                </div>
-                {% if user.pk == request.user.pk %}
-                <div class="col-2 d-flex justify-content-end">
-                    <a href="{% url 'posts:update' post.id %}" class="btn btn-outline-success fas fa-pen" id="{{post.id}}"></a>
-                    <button class="btn btn-outline-danger fas fa-trash delete ms-1" id="{{post.id}}"></button>
-                </div>
-                {% endif %}
-            </div><div class="row">
-                <div class="col-1"></div>
-                {% if post.location %}
-                <p class="small col-10 mb-1">{{post.location}}</p>
-                {% else %}
-                <div class="mb-2"></div>
-                {% endif %}
+{% include 'nav.html' %}
+{% comment %} <a href="javascript:history.back()" class="fas fa-arrow-left link-dark text-decoration-none m-4 ms-5 fa-2x" style="color: rgb(180, 180, 180);"></a> {% endcomment %}
+<div class="detail card post bg-white my-4 mx-auto shadow" id="{{post.id}}">
+    <div class="card-header d-flex align-items-center">
+        <a class="px-1" href="{% url 'profiles:detail' post.user.pk %}">
+            <img class="avatar-sm fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
+        </a>
+        <div class="ms-2 flex-grow-1 d-flex flex-column align-items-start justify-content-evenly">
+            <a class="name m-0 link-dark text-decoration-none fw-bold" style="font-size: 1.2em;" href="{% url 'profiles:detail' post.user.pk %}">{{post.user}}</a>
+            {% if post.location %}
+            <p class="small col-10 mb-1 fw-light lh-1">{{post.location}}</p>
+            {% else %}
+            <div class="mb-2"></div>
+            {% endif %}
+        </div>
+    </div>
+    <figure class="figure post-image card-img d-flex align-content-center justify-content-center m-auto" onclick="window.location='{% url 'posts:detail' post.pk %}'">
+        <img src="{{post.image.url}}" alt="post" class="figure-img img-fluid mx-auto">
+    </figure>
+    <div class="card-body py-1">
+        <div class="links d-flex justify-content-between mb-1 pt-0">
+            <div class="thumbs d-flex align-items-center">
+                <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
+                <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
             </div>
-        </header>
-        <div class="breaker w-100 mb-1"></div>
-        <figure class="figure post-image" onclick="window.location='{% url 'posts:detail' post.pk %}'">
-            <div class="bg-image" style="background-image: url({{post.image.url}});"></div>
-            <div class="blur"></div>
-            <img src="{{post.image.url}}" alt="post" class="position-absolute start-50 top-50 translate-middle">
-        </figure>
-        <footer class="py-1 px-3 w-100">
-            <div class="d-flex justify-content-between">
-                <div class="thumbs">
-                    <i class="btn {% for like in post_likes %}{% if like.user == request.user %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</i>
-                    <i class="btn {% for like in post_likes %}{% if like.user == request.user %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</i>
-                </div>
-                <div>
-                    <a href="{% url 'posts:detail' post.pk %}" class="btn link-dark text-decoration-none">
-                        <small class="">{{post.get_comment_count}}</small>
-                        <i class="text-primary fas fa-comment-alt"></i>
-                    </a>
-                </div>
-            </div>  
-            <div class="breaker"></div>
-            <p class="description text-truncate px-3 mt-1 mb-0">{{post.description}}</p>
-        </footer>
-        <form method="POST" class="m-3">{% csrf_token %}
+            <div>
+                <a href="{% url 'posts:detail' post.pk %}" class="btn link-dark text-decoration-none">
+                    <small class="me-1 c{{post.id}} icon-sm">{{post.get_comment_count}}</small>
+                    <span class="text-primary fas fa-comment-alt icon-sm"></span>
+                </a>
+            </div>
+        </div>
+        {% if post.description %}
+        <p class="card-text fw-bold">{{post.description}}</p>
+        {% endif %}     
+        <form method="POST" class="my-3 mt-0">{% csrf_token %}
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="Comment" name="text">
                 <button type="submit" class="btn btn-outline-primary input-group-text fas fa-paper-plane"></button>
             </div>
         </form>
-        {% if comments %}
-        <small class="text-end mx-3 position-sticky bg-white comment-toggler py-2"><a href="#comments" class="text-decoration-none link-dark text-muted" type="button" data-bs-toggle="collapse" aria-controls="comments">{{post.get_comment_count}} comments</a></small>
-        <div class="collapse p-2" id="comments">
-            {% for comment in comments %}
-            <div class="container-fluid comment">
-                <div class="breaker my-3 w-100"></div>
-                <div class="row">
-                    <div class="col-1">
-                        <a class="col-1 ms-1" href="{% url 'profiles:detail' comment.user.pk %}">
-                            <img class="i-avatar fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
-                        </a>
-                    </div>
-                    <div class="col-8 text-muted p-0 my-auto">
-                        <small>
-                            <strong>{{comment.user}}</strong>
-                        </small>
-                    </div>
-                    <div class="col-3 text-muted d-flex justify-content-end">
-                        <small>{{comment.date_created}}</small>
-                    </div>
+    </div>
+    <div class="card-footer text-muted text-end mx-3">
+        2 days ago
+    </div>
+    {% if comments %}
+    <ul class="list-group list-group-flush">
+        {% for comment in comments %}
+        <li class="list-group-item">
+            <header class="d-flex justify-content-between align-items-center">
+                    <a class="ms-1 link-dark text-decoration-none" href="{% url 'profiles:detail' comment.user.pk %}">
+                        <img class="i-avatar fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
+                        <strong>{{ comment.user.username }}</strong>
+                    </a>
+                    <small>{{comment.date_created}}</small>
+            </header>
+            <p class="p-0 m-0 py-3 mx-3">{{comment.text}}</p>
+            <footer>
+                <div class="comment-thumbs">
+                    <i class="btn {% for like in comment_likes %}{% if like.user == request.user and like.comment == comment %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up comment-rate rate like c{{comment.id}}" id="{{comment.id}}">{{comment.get_like_count}}</i>
+                    <i class="btn {% for like in comment_likes %}{% if like.user == request.user and like.comment == comment %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down comment-rate rate dislike c{{comment.id}}" id="{{comment.id}}">{{comment.get_dislike_count}}</i>
                 </div>
-                <div class="row">
-                    <div class="col-1"></div>
-                    <div class="col-10 p-0">{{comment.text}}</div>
-                    <div class="comment-thumbs">
-                        <i class="btn {% for like in comment_likes %}{% if like.user == request.user and like.comment == comment %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up comment-rate rate like c{{comment.id}}" id="{{comment.id}}">{{comment.get_like_count}}</i>
-                        <i class="btn {% for like in comment_likes %}{% if like.user == request.user and like.comment == comment %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down comment-rate rate dislike c{{comment.id}}" id="{{comment.id}}">{{comment.get_dislike_count}}</i>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </section>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            trashes = document.querySelectorAll('.delete');
-            trashes.forEach((trash) => {
-                trash.addEventListener('click', (event) => {
-                    let xhr = new XMLHttpRequest();
-                    xhr.open('POST', "{% url 'posts:delete' %}", true);
-                    xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.send(JSON.stringify({ id: event.target.id }));
-                    xhr.onreadystatechange = () => window.location = "{% url 'posts:list' %}"
-                });
-            });
-            rates = document.querySelectorAll('.rate');
-            rates.forEach((rate) => {
-                rate.addEventListener('click', (event) => {
-                    let xhr = new XMLHttpRequest();
-                    let thumbs = 0;
-                    if (event.target.classList.contains('comment-rate')){
-                        thumbs = document.querySelectorAll('.c' + event.target.id);
-                        xhr.open('POST', "{% url 'posts:like_comment' %}", true);
-                    }else{                        
-                        thumbs = document.querySelectorAll('.p' + event.target.id);
-                        xhr.open('POST', "{% url 'posts:like_post' %}", true);
-                    }
-                    xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    if (event.target.classList.contains('like')) {
-                        if (event.target.classList.contains('fas')) {
-                            event.target.classList.remove('fas', 'text-primary');
-                            event.target.classList.add('far');
-                            value = 0;
-                        } else {
-                            event.target.classList.add('fas', 'text-primary');
-                            value = 1;
-                            if (thumbs[1].classList.contains('fas')) {
-                                thumbs[1].classList.remove('fas', 'text-danger');
-                            }
-                        }
-                    } else {
-                        if (event.target.classList.contains('fas')) {
-                            event.target.classList.remove('fas', 'text-danger');
-                            event.target.classList.add('far');
-                            value = 0;
-                        } else {
-                            event.target.classList.add('fas', 'text-danger');
-                            value = -1;
-                            if (thumbs[0].classList.contains('fas')) {
-                                thumbs[0].classList.remove('fas', 'text-primary');
-                            }
-                        }
-                    }
-                    xhr.send(JSON.stringify({ id: event.target.id, value: value }));
-                    xhr.onreadystatechange = () => {
-                        if (xhr.readyState != 4) return;
-                        if (xhr.status == 200) {
-                            const data = JSON.parse(xhr.responseText);
-                            thumbs[0].textContent = data['likes'];
-                            thumbs[1].textContent = data['dislikes'];
-                        }
-                    };
-                });
+            </footer>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        trashes = document.querySelectorAll('.delete');
+        trashes.forEach((trash) => {
+            trash.addEventListener('click', (event) => {
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', "{% url 'posts:delete' %}", true);
+                xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ id: event.target.id }));
+                xhr.onreadystatechange = () => window.location = "{% url 'posts:list' %}"
             });
         });
-    </script>
-    {% endblock %}
+        rates = document.querySelectorAll('.rate');
+        rates.forEach((rate) => {
+            rate.addEventListener('click', (event) => {
+                let xhr = new XMLHttpRequest();
+                let thumbs = 0;
+                if (event.target.classList.contains('comment-rate')){
+                    thumbs = document.querySelectorAll('.c' + event.target.id);
+                    xhr.open('POST', "{% url 'posts:like_comment' %}", true);
+                }else{                        
+                    thumbs = document.querySelectorAll('.p' + event.target.id);
+                    xhr.open('POST', "{% url 'posts:like_post' %}", true);
+                }
+                xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                if (event.target.classList.contains('like')) {
+                    if (event.target.classList.contains('fas')) {
+                        event.target.classList.remove('fas', 'text-primary');
+                        event.target.classList.add('far');
+                        value = 0;
+                    } else {
+                        event.target.classList.add('fas', 'text-primary');
+                        value = 1;
+                        if (thumbs[1].classList.contains('fas')) {
+                            thumbs[1].classList.remove('fas', 'text-danger');
+                        }
+                    }
+                } else {
+                    if (event.target.classList.contains('fas')) {
+                        event.target.classList.remove('fas', 'text-danger');
+                        event.target.classList.add('far');
+                        value = 0;
+                    } else {
+                        event.target.classList.add('fas', 'text-danger');
+                        value = -1;
+                        if (thumbs[0].classList.contains('fas')) {
+                            thumbs[0].classList.remove('fas', 'text-primary');
+                        }
+                    }
+                }
+                xhr.send(JSON.stringify({ id: event.target.id, value: value }));
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState != 4) return;
+                    if (xhr.status == 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        thumbs[0].textContent = data['likes'];
+                        thumbs[1].textContent = data['dislikes'];
+                    }
+                };
+            });
+        });
+    });
+</script>
+{% endblock %}

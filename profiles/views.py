@@ -70,18 +70,41 @@ class SearchProfileView(LoginRequiredMixin, ListView):
         return context
 
 
+# class JSONSearchProfile(LoginRequiredMixin, View):
+#     http_method_names = ['post']
+
+#     def post(self, request):
+#         body = json.loads(request.body)
+#         search = body['search']
+#         user = self.request.user
+#         qs = User.objects.filter(username__istartswith=search).exclude(id=user.id).defer('password')
+#         context = list(qs.values())
+#         for i in range(len(context)):
+#             profile = get_object_or_404(User, id=context[i]['id'])
+#             if Friendship.objects.filter(user=user, friend=profile).exists():
+#                 context[i]['status'] = 'friend'
+#             elif Notification.objects.filter(sender=user, receiver=profile).exists():
+#                 context[i]['status'] = 'waiting'
+#             else:
+#                 context[i]['status'] = 'stranger'
+#             if profile.date_of_birth:
+#                 context[i]['age'] = profile.get_age()
+#             context[i]['avatar'] = profile.get_avatar_url()
+#         return JsonResponse(context, safe=False)
+
+
 class FriendRequest(LoginRequiredMixin, View):
     http_method_names = ['post']
 
     def post(self, request):
         body = json.loads(request.body)
         user = request.user
-        friend = get_object_or_404(User, id=body['profile_id'])
-        value = body['value']
+        friend = get_object_or_404(User, id=body.get('profile_id'))
+        value = body.get('value')
         notification_exists = Notification.objects.filter(sender=friend, receiver=user).exists()
-        if (value == 'send' or value == 'deny') and Friendship.objects.filter(user=user, friend=friend).exists():
+        if value == 'send' and Friendship.objects.filter(user=user, friend=friend).exists():
             return JsonResponse({'status': "You're friend alredy"})
-        if value == 'send' and not notification_exists:
+        elif value == 'send' and not notification_exists:
             Notification.objects.create(sender=user, receiver=friend)
         elif value == 'cancel' and notification_exists:
             Notification.objects.get(sender=user, receiver=friend).delete()
@@ -96,29 +119,6 @@ class FriendRequest(LoginRequiredMixin, View):
 def create_room(user1_id, user2_id):
     users = sorted([user1_id, user2_id])
     return int('0'.join([str(users[0]), str(users[1])]))
-
-
-class JSONSearchProfile(LoginRequiredMixin, View):
-    http_method_names = ['post']
-
-    def post(self, request):
-        body = json.loads(request.body)
-        search = body['search']
-        user = self.request.user
-        qs = User.objects.filter(username__istartswith=search).exclude(id=user.id).defer('password')
-        context = list(qs.values())
-        for i in range(len(context)):
-            profile = get_object_or_404(User, id=context[i]['id'])
-            if Friendship.objects.filter(user=user, friend=profile).exists():
-                context[i]['status'] = 'friend'
-            elif Notification.objects.filter(sender=user, receiver=profile).exists():
-                context[i]['status'] = 'waiting'
-            else:
-                context[i]['status'] = 'stranger'
-            if profile.date_of_birth:
-                context[i]['age'] = profile.get_age()
-            context[i]['avatar'] = profile.get_avatar_url()
-        return JsonResponse(context, safe=False)
 
 
 class CreateFriendshipView(LoginRequiredMixin, View):
@@ -164,7 +164,6 @@ class JSONSearchFriend(LoginRequiredMixin, View):
         search = body['search']
         user = self.request.user
         qs = User.objects.filter(username__istartswith=search).exclude(id=user.id).defer('password')
-        # context = serializers.serialize('json', qs)
         context = list(qs.values())
         for i in range(len(context)):
             profile = get_object_or_404(User, id=context[i]['id'])
@@ -172,4 +171,3 @@ class JSONSearchFriend(LoginRequiredMixin, View):
             print(context[i])
 
         return JsonResponse(context, safe=False)
-        # return HttpResponse(json.dumps(context), content_type='application/json')

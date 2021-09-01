@@ -4,80 +4,58 @@
 {% block content %}
 {% include 'nav.html' %}
 <link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
-
-<section class="profile position-fixed d-flex flex-column p-3 bg-white me-5">
-    <figure class="mb-3 figure mx-auto">
-        <img src="{{user.get_avatar_url}}" alt="avatar" class="figure-img avatar img-fluid">
-        <figcaption class="figure-caption text-center">Avatar</figcaption>
-    </figure>
-    <div>
-        <div class="d-flex w-100 justify-content-evenly text-center mb-3 text-primary">
-            <div class="d-flex flex-column justify-content-center py-2 px-3 border border-2 border-primary rounded-3">
-                <h4>{{user.my_friend.count}}</h4>
-                <h5>Friends</h5>
+<section class="profile-detail w-100 container-sm px-3 py-2 bg-white shadow">
+    <div class="row p-3 pb-0">
+        <div class="col-4 d-flex justify-content-center align-items-center">
+            <figure class="figure">
+                <img src="{{user.get_avatar_url}}" alt="avatar" class="figure-img avatar-lg img-fluid">
+            </figure>
+        </div>
+        <div class="col-8 d-flex flex-column justify-content-center">
+            <div class="d-flex">
+                <label class="fw-bold me-2" for="username">Username:</label>
+                <p>{{user.username}}</p>
             </div>
-            <div class="d-flex flex-column justify-content-center py-2 px-3 border border-2 border-primary rounded-3">
-                <h4>{{user.post_set.count}}</h4>
-                <h5>Posts</h5>
+            {% if user.get_full_name %}
+            <div class="d-flex">
+                <label class="fw-bold me-2" for="Full Name">Name:</label>
+                <p>{{user.get_full_name}}</p>
+            </div>
+            {% endif %}
+            
+            {% if user.date_of_birth %}
+            <div class="d-flex">
+                <label class="fw-bold me-2" for="date_of_birth">Birthday:</label>
+                <p>{{user.date_of_birth}}</p>
+            </div>
+            {% endif %}
+            
+            {% if user.country %}
+            <div class="d-flex">
+                <label class="fw-bold me-2" for="country">Country:</label>
+                <p>{{user.country}}</p>
+            </div>
+            {% endif %}
+            <div class="d-flex">
+                <label class="fw-bold me-2" for="friends">Friends:</label>
+                <p>{{user.my_friend.count}}</p>
             </div>
         </div>
-        <div class="d-flex">
-            <label class="fw-bold me-2" for="username">Username:</label>
-            <p>{{user}}</p>
-        </div>
-        {% if user.get_full_name %}
-        <div class="d-flex">
-            <label class="fw-bold me-2" for="Full Name">Full Name:</label>
-            <p>{{user.get_full_name}}</p>
-        </div>
-        {% endif %}
-        
-        {% if user.date_of_birth %}
-        <div class="d-flex">
-            <label class="fw-bold me-2" for="date_of_birth">Date of Birth:</label>
-            <p>{{user.date_of_birth}}</p>
-        </div>
-        <div class="d-flex">
-            <label class="fw-bold me-2" for="age">Age:</label>
-            <p>{{user.get_age}}</p>
-        </div>
-        {% endif %}
-        
-        {% if user.gender %}
-        <div class="d-flex">
-            <label class="fw-bold me-2" for="gender">Gender:</label>
-            <p>{{user.gender}}</p>
-        </div>
-        {% endif %}
-        
-        {% if user.country %}
-        <div class="d-flex">
-            <label class="fw-bold me-2" for="country">Country:</label>
-            <p>{{user.country}}</p>
-        </div>
-        {% endif %}
-        
-        {% if user.biography %}
-        <div class="d-flex flex-column">
-            <label class="fw-bold" for="biography">About Me:</label>
-            <p class="biography p-3">{{user.biography}}</p>
-        </div>
-        {% endif %}
-        
     </div>
-    {% if user.pk == request.user.pk %}
-    <a href="{% url 'profiles:update' request.user.pk %}" class="btn btn-primary position-fixed bottom-0 end-0" style="margin-bottom: 7.5em; margin-right: 4em;">Edit</a>
-    {% endif %}
+    <div class="row p-3 pt-0">
+        <p>{{user.biography}}</p>
+    </div>
 </section>
 
 {% if user.pk == request.user.pk %}
-<div class="add-post position-fixed bottom-0 end-0 mb-3 me-5">
-    <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><i class="fas fa-plus big-plus fa-4x"></i></button>
-</div>
-
+<nav class="position-fixed bottom-0 vw-100 shadow bg-white d-flex justify-content-center align-items-center">
+    <div class="big-plus">
+        <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><span class="fas fa-plus big-plus fa-4x"></span></button>
+    </div>
+</nav>
 <form method="POST" action="{% url 'posts:create' %}"  class="modal fade" id="add-post" tabindex="-1" aria-labelledby="add-post" aria-hidden="true" enctype="multipart/form-data">{% csrf_token  %}
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content mx-3">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Add Post</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -111,60 +89,46 @@
 {% endif %}
 
 {% if has_access %}
-<section class="posts d-flex flex-column ms-5 my-1 infinite-container">
+<section class="d-flex flex-column mx-auto infinite-container mt-2 w-100 d-flex align-items-center" style="margin-bottom: 7em;">
     {% for post in posts %}
-    <div class="post d-flex flex-column bg-white py-2 my-1 infinite-item" id="{{post.id}}">
-        <header class="container px-3">
-            <div class="row  align-items-center">
-                <div class="col-1 ps-3 pe-0">
-                    <a class="col-1 ms-1" href="{% url 'profiles:detail' post.user.pk %}">
-                        <img class="i-avatar fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
-                    </a>
-                </div>
-                <div class="col-9">
-                    <a class="name m-0 link-dark text-decoration-none h5" href="{% url 'profiles:detail' post.user.pk %}">{{post.user}}</a>
-                </div>
-                {% if user.pk == request.user.pk %}
-                <div class="col-2">
-                    <a href="{% url 'posts:update' post.id %}" class="btn btn-outline-success fas fa-pen" id="{{post.id}}"></a>
-                    <button class="btn btn-outline-danger fas fa-trash delete" id="{{post.id}}"></button>
-                </div>
-                {% endif %}
-            </div>
-            <div class="row">
-                <div class="col-1"></div>
+    <div class="card post bg-white m-0 py-2 my-1 infinite-item shadow" id="{{post.id}}">
+        <div class="card-header d-flex align-items-center">
+            <a class="px-1" href="{% url 'profiles:detail' post.user.pk %}">
+                <img class="avatar-sm fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
+            </a>
+            <div class="ms-2 flex-grow-1 d-flex flex-column align-items-start justify-content-evenly">
+                <a class="name m-0 link-dark text-decoration-none fw-bold" style="font-size: 1.2em;" href="{% url 'profiles:detail' post.user.pk %}">{{post.user}}</a>
                 {% if post.location %}
-                <p class="small col-10 mb-1">{{post.location}}</p>
+                <p class="small col-10 mb-1 fw-light lh-1">{{post.location}}</p>
                 {% else %}
                 <div class="mb-2"></div>
                 {% endif %}
             </div>
-        </header>
-        <div class="breaker w-100 mb-2"></div>
-        <figure class="figure post-image" onclick="window.location='{% url 'posts:detail' post.pk %}'">
-            <div class="bg-image" style="background-image: url({{post.image.url}});"></div>
-            <div class="blur"></div>
-            <img src="{{post.image.url}}" alt="post" class="position-absolute start-50 top-50 translate-middle">
+        </div>
+        <figure class="figure post-image card-img d-flex align-content-center justify-content-center m-auto" onclick="window.location='{% url 'posts:detail' post.pk %}'">
+            <img src="{{post.image.url}}" alt="post" class="figure-img img-fluid mx-auto">
         </figure>
-        <footer class="py-1 px-3 w-100">
-            <div class="d-flex justify-content-between">
-                <div class="thumbs">
-                    <i class="btn {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</i>
-                    <i class="btn {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</i>
+        <div class="card-body pb-1 pt-0">
+            <div class="links d-flex justify-content-between mb-1 pt-0">
+                <div class="thumbs d-flex align-items-center">
+                    <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
+                    <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
                 </div>
                 <div>
                     <a href="{% url 'posts:detail' post.pk %}" class="btn link-dark text-decoration-none">
-                        <small class="me-1 c{{post.id}}">{{post.get_comment_count}}</small>
-                        <i class="text-primary fas fa-comment-alt"></i>
+                        <small class="me-1 c{{post.id}} icon-sm">{{post.get_comment_count}}</small>
+                        <span class="text-primary fas fa-comment-alt icon-sm"></span>
                     </a>
                 </div>
-            </div>  
-            <div class="breaker"></div>
-            <p class="description text-truncate px-3 mt-1 mb-0">{{post.description}}</p>
-        </footer>
-        <div class="input-group my-2 mx-4">
-            <input type="text" class="form-control comment-input{{post.id}}" placeholder="Comment" id="{{post.id}}">
-            <button type="submit" class="btn btn-outline-primary input-group-text comment-submit me-5 fas fa-paper-plane" id="{{post.id}}"></button>
+            </div>
+            {% if post.description %}
+            <div class="row" onclick="window.location='{% url 'posts:detail' post.pk %}'">
+                <p class="card-text text-truncate col fw-bold">{{post.description}}</p>  
+            </div>
+            {% endif %}     
+        </div>
+        <div class="card-footer text-muted text-end">
+            2 days ago
         </div>
     </div>
     <div class="pagination">
@@ -272,20 +236,6 @@
             element: $('.infinite-container')[0],
             offset: 'bottom-in-view',
             onBeforePageLoad: () => {
-                rates = document.querySelectorAll('.rate');
-                rates.forEach(rate => {
-                    rate.removeEventListener('click', sendRate);
-                })  
-                
-                commentBtns = document.querySelectorAll('.comment-submit');
-                commentBtns.forEach(btn => {
-                    btn.removeEventListener('click', sendComment);
-                })
-                
-                trashes = document.querySelectorAll('.delete');
-                trashes.forEach((trash) => {
-                    trash.removeEventListener('click', deletePost);
-                })
 
             },
             onAfterPageLoad: () => {

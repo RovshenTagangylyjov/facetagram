@@ -1,87 +1,45 @@
 body,
 html {
-	font-family: Roboto;
-	background-color: #e0e0e0;
-	color: #303030;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	overflow-y: visible;
 	scroll-behavior: smooth;
+	height: 100vh;
 }
 
-.posts {
-	width: 55%;
-	height: 92%;
+.card{
+	margin: 2em 1em 0 1em;
+	width: 40em;
 }
 
-.posts .post,
-.profile {
-	box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.25);
-	border-radius: 5px;
-}
-
-.posts .post footer i {
-	font-size: 1.2em;
-}
-
-.posts .post .breaker {
-	content: '';
-	display: block;
-	width: 97%;
-	height: 2px;
-	background-color: #aaaaaa;
-	margin: auto;
-}
-
-.posts .post input {
-	background-color: #e0e0e0;
-}
-
-.posts .post .comment-toggler {
-	top: 5.4em;
-}
-
-.post-image {
-	height: 27em;
-	position: relative;
-	width: 100%;
+.detail{
+	width: 80%;
 }
 
 .modal .post-image {
-	height: 20em;
 	width: 100%;
 }
 
 .detail .post-image {
-	height: 35em;
+	min-height: 30em;
 }
 
-.bg-image {
-	content: '';
+/* .bg-img {
+	position: absolute;
 	background-position: center;
 	background-size: cover;
 	background-repeat: no-repeat;
-	position: absolute;
 	width: 100%;
 	height: 100%;
-	filter: blur(4px);
-	-webkit-filter: blur(4px);
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	filter: blur(5px) grayscale(40%) brightness(80%);
+	-webkit-filter: blur(5px) grayscale(40%) brightness(80%);
 	border: 5px solid #ffffff;
-}
-.blur {
-	content: '';
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	background: rgba(255, 255, 255, 0.733);
-}
-.post-image img {
-	max-width: 100%;
-	height: 100%;
-}
+} */
 
-.icon {
-	color: #0d6efd;
-}
 .big-plus {
+	z-index: 10;
 	background: linear-gradient(
 		100deg,
 		blue 0%,
@@ -92,28 +50,116 @@ html {
 		#cc2366 80%,
 		#bc1888 100%
 	);
+	background-clip: text;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 }
+
 .add-post {
 	clip-path: circle();
 	box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.4);
 }
-.profile {
-	width: 35%;
-	height: 80%;
-	top: 4.9em;
-	right: 0;
-	font-family: poppins;
-	overflow: hidden;
+
+.profile-detail p{
+	font-size: 1em;
 }
-.profile .biography {
-	max-height: 16.5em;
-	overflow-y: auto;
+
+.chat {
+	width: 55%;
+	height: 85vh;
+}
+
+.chat .messages {
+	overflow-y: scroll;
 	overflow-x: hidden;
+	scroll-behavior: smooth;
 }
-.avatar {
+
+.chat .messages .message{
+	max-width: 70%;
+}
+
+.chat .messages .message .avatar{
+	width: 2em;
+	height: 2em;
+}
+
+.chat .messages .message .text {
+	max-width: 100%;
+	overflow-wrap: break-word;
+}
+
+.icon-sm{
+	font-size: 1.3em;
+}
+
+.icon-lg{
+	font-size: 1.5rem;
+}
+
+.avatar-sm {
 	border-radius: 50%;
-	width: 10em;
-	height: 10em;
+	width: 1.4em;
+	height: 1.4em;
+}
+
+.avatar-md{
+	width: 3em;
+	height: 3em;
+}
+
+.avatar-lg {
+	border-radius: 50%;
+	width: 100%;
+	height: 100%;
+}
+
+@media only screen and (max-width: 650px){
+	html, body{
+		font-size: 14px;
+	}
+	.post{
+		width: 100%;
+	}
+	.card{
+		margin: .2em 1em 0 .2em;
+	}
+}
+
+@media only screen and (max-width: 500px) {
+	html, body{
+		font-size: 13px;
+	}
+	.chat{
+		width: 100vw;
+		height: 100vh;
+	}
+	.chat .input-group{
+		position: fixed;
+		bottom: 0;
+	}
+}
+
+@media only screen and (max-width: 450px) {
+	html, body{
+		font-size: 12px;
+	}
+}
+
+@media only screen and (max-width: 400px) {
+	html, body{
+		font-size: 11px;
+	}
+}
+
+@media only screen and (max-width: 300px) {
+	html, body{
+		font-size: 9px;
+	}
+}
+
+@media only screen and (max-width: 250px) {
+	html, body{
+		font-size: 8px;
+	}
 }

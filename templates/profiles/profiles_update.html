@@ -3,16 +3,17 @@
 {% block title %}facetagram{% endblock %}
 {% block content %}
 {% include 'nav.html' %}
+<link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
 <style>
-    .fas{
+    {% comment %} .fas{
         width: 40px;
-    }
+    } {% endcomment %}
+
     .avatar {
         border-radius: 50%;
         width: 10em;
         height: 10em;
     }
-
 
 </style>
 <form method="POST" class="container-sm my-5" enctype="multipart/form-data"> {% csrf_token %}
@@ -21,7 +22,7 @@
             <div class="row mb-3 flex-column align-items-center">
                 <label for="username" class="label text-capitalize">username:</label>
                 <div class="input-group">
-                    <i class="fas fa-user text-white bg-primary input-group-text"></i>
+                    <i class="fas fa-user text-white bg-primary input-group-text icon-sm"></i>
                     <input type="text" class="form-control" name="username"
                            value='{{form.username.value|default_if_none:""}}' maxlength="150" required
                            placeholder="Type here...">
@@ -30,7 +31,7 @@
             <div class="row mb-3 flex-column align-items-center">
                 <label for="first_name" class="label text-capitalize">first name:</label>
                 <div class="input-group">
-                    <i class="fas fa-id-card text-white bg-primary input-group-text"></i>
+                    <i class="fas fa-id-card text-white bg-primary input-group-text icon-sm"></i>
                     <input type="text" class="form-control" value='{{form.first_name.value|default_if_none:""}}'
                            name="first_name" maxlength="150" placeholder="Type here...">
                 </div>
@@ -38,7 +39,7 @@
             <div class="row mb-3 flex-column align-items-center">
                 <label for="last_name" class="label text-capitalize">last name:</label>
                 <div class="input-group">
-                    <i class="fas fa-id-card text-white bg-primary input-group-text"></i>
+                    <i class="fas fa-id-card text-white bg-primary input-group-text icon-sm"></i>
                     <input type="text" class="form-control" value='{{form.last_name.value|default_if_none:""}}'
                            name="last_name" maxlength="150" placeholder="Type here...">
                 </div>
@@ -46,7 +47,7 @@
             <div class="row mb-3 flex-column align-items-center">
                 <label for="email" class="label text-capitalize">email address:</label>
                 <div class="input-group">
-                    <i class="fas fa-envelope text-white bg-primary input-group-text"></i>
+                    <i class="fas fa-envelope text-white bg-primary input-group-text icon-sm"></i>
                     <input type="email" class="form-control" value='{{form.email.value|default_if_none:""}}'
                            name="email" maxlength="243" required placeholder="Type here...">
                 </div>
@@ -69,7 +70,7 @@
             <div class="row mb-3 flex-column align-items-center">
                 <label for="country" class="label text-capitalize">country:</label>
                 <div class="input-group">
-                    <i class="fas fa-city text-white bg-primary input-group-text"></i>
+                    <i class="fas fa-city text-white bg-primary input-group-text icon-sm"></i>
                     <input type="text" class="form-control" value='{{form.country.value|default_if_none:""}}'
                            name="country" maxlength="150" placeholder="Type here...">
                 </div>
@@ -77,7 +78,7 @@
             <div class="row mb-3 flex-column align-items-center">
                 <label for="date_of_birth" class="label text-capitalize">date of birth:</label>
                 <div class="input-group">
-                    <i class="fas fa-birthday-cake text-white bg-primary input-group-text"></i>
+                    <i class="fas fa-birthday-cake text-white bg-primary input-group-text icon-sm"></i>
                     <input type="date" class="form-control" value='{{form.date_of_birth.value|date:"Y-m-d"}}'
                            name="date_of_birth">
                 </div>
@@ -85,7 +86,7 @@
             <div class="row mb-3 flex-column align-items-center">
                 <label for="gender" class="label text-capitalize">gender:</label>
                 <div class="input-group">
-                    <i class="fas fa-male text-white bg-primary input-group-text"></i>
+                    <i class="fas fa-male text-white bg-primary input-group-text icon-sm"></i>
                     <select name="gender" id="gender_id" class="form-select">
                         {% for option in form.gender %}
                         {{option}}
@@ -103,11 +104,11 @@
     <div class="row justify-content-between me-5 flex-wrap">
         <div class="col-3">
             <label class="label">Private:</label>
-            <input type="checkbox" name="is_private" class="checkbox" {% if form.is_private.value == True %}checked{% endif %}>
+            <input type="checkbox" name="is_private" class="checkbox" {% if form.is_private.value == True %}checked{% endif %} title="When your account is private, just your friends can see your posts.">
         </div>
         <div class="btn-group col-3" role="group">
-            <a class="btn btn-danger" href="{% url 'profiles:detail' user.pk %}">Cancel</a>
-            <button class="btn btn-primary px-3" type="submit">Save</button>
+            <a class="btn btn-danger lh-lg" href="{% url 'profiles:detail' user.pk %}">Cancel</a>
+            <button class="btn btn-primary px-3 lh-lg" type="submit">Save</button>
         </div>
     </div>
 

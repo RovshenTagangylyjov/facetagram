@@ -12,12 +12,13 @@ class RegisterView(CreateView):
 
     def get_success_url(self):
         return reverse('authenticate:login')
+    
+    def form_valid(self, form):
+        form = form.save(commit=False)
+        form.username = form.username.lower()
+        return super().form_valid(form)
 
 
 class CustomLoginView(LoginView):
     template_name = 'authenticate/login.html'
 
-    def get(self, request, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            return redirect('posts:list')
-        return super(CustomLoginView, self).get(request, *args, **kwargs)

@@ -3,34 +3,35 @@
 {% block title %}Login|facetagram{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/custom/register.css' %}">
-<div class="greating text-center mt-5 pt-5 w-50 text-primary text-uppercase m-auto">
-    <p>hey, welcome back!!!</p>
-</div>
-<form method="POST" class="d-flex flex-column align-items-center mx-auto py-3 px-5 position-relative">{% csrf_token %}
+<form method="POST" class="shadow rounded-3 d-flex flex-column align-items-center justify-content-center py-3 px-5 position-absolute translate-middle-x start-50">
+    {% csrf_token %}
+    <div class="row justify-content-center border-bottom pb-3">
+        <img src="{% static 'favicon.ico' %}" alt="icon" class="icon-lg">
+    </div>
     <div class="row mt-3">
-        <label for="username" class="form-label">Username</label>
+        <label for="username" class="form-label ps-0">Username:</label>
         <div class="input-group has-validation">
-            <i class="input-group-text far fa-user text-primary" id="username-icon"></i>
-            <input type="text" class="form-control" name="username" id="username" autocomplete="username" required autofocus value='{{form.username.value|default_if_none:""}}' aria-describedby="username-feedback username-icon">
-            <div class="invalid-feedback" id="username-feedback">
-                {{form.errors.username}}
-            </div>
+            <span class="input-group-text far fa-user text-white bg-primary" id="username-icon"></span>
+            <input type="text" class="form-control {% if form.errors %} is-invalid {% endif %}" name="username" id="username" autocomplete="username" required autofocus value='{{form.username.value|default_if_none:""}}' aria-describedby="invalid-feedback">
         </div>
     </div>
     <div class="row mt-3">
-        <label for="password" class="form-label">Password</label>
+        <label for="password" class="form-label ps-0">Password:</label>
         <div class="input-group has-validation">
-            <i class="input-group-text fas fa-key text-primary" id="password-icon"></i>
-            <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password" aria-describedby="password-feedback password-icon">
-            <div class="invalid-feedback" id="password-feedback">
-                {{form.errors.password}}
-            </div>
+            <span class="input-group-text fas fa-key text-white bg-primary" id="password-icon"></span>
+            <input type="password" class="form-control {% if form.errors %} is-invalid {% endif %}" id="password" name="password" required autocomplete="current-password" aria-describedby="invalid-feedback">
         </div>
     </div>
-    <div class="row my-3">
-        <input type="submit" class="btn btn-primary" value="Login">
+    {% if form.errors %}
+    <div class="invalid-feedback d-block" id="invalid-feedback">
+        {{form.errors}}
     </div>
-    <footer class="position-absolute bottom-0 mb-1 w-100 text-center">Don't have an account yet? Please <a href="{% url 'authenticate:register' %}">Register</a>
+    {% endif %}
+    <div class="row my-3 {% if form.errors %}mt-0{% endif %}">
+        <input type="submit" class="btn btn-primary w-100" value="Login">
+    </div>
+    <footer class="my-1 w-100 text-center">
+        Don't have an account yet? Please <a href="{% url 'authenticate:register' %}" class="text-decoration-none">Register</a>
     </footer>
 </form>
 {% endblock %}

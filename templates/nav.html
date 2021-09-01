@@ -1,55 +1,64 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/custom/nav.css' %}">
-<nav class="navbar navbar-expand-md navbar-primary bg-white position-sticky top-0">
+<nav class="navbar navbar-expand-sm navbar-primary bg-white position-sticky top-0 py-0">
     <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'home' %}">facetagram</a>
         <button class="navbar-toggler btn btn-outline-primary" type="button" data-bs-toggle="collapse"
         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
         aria-label="Toggle navigation">
-        <span class="fas fa-bars"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mb-2 mb-lg-0 justify-content-between w-100">
-            <ul></ul>
-            <ul class="navbar-nav w-50 d-flex justify-content-evenly">
-                <li class="nav-item ms-3 w-auto friends p-1">
-                    <a href="{% url 'profiles:friends' %}" class="fas fa-user-friends nav-link" title="My friends"></a>
-                </li>
-                <li class="nav-item ms-3 home p-1">
-                    <a href="{% url 'posts:list' %}" title="Home Page" class="fas fa-home nav-link"></a>
-                </li>
-                <li class="nav-item ms-3 search-profile p-1">
-                    <a href="{% url 'profiles:search_profile' %}" class="fas fa-search nav-link"
+            <span class="fas fa-bars icon-lg"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav flex-row justify-content-evenly justify-content-sm-end align-items-center w-100">
+                {% if request.user.is_authenticated %}
+                <li class="nav-item search-profile p-1 my-1 me-1">
+                    <a href="{% url 'profiles:search_profile' %}" title="Find users" class="fas fa-search nav-link p-1 icon-lg"
                     title="Find new friends"></a>
                 </li>
-            </ul>
-            <ul class="navbar-nav w-25 d-flex justify-content-end">
-                <li class="nav-item dropstart ms-3">
+                <li class="nav-item friends p-1 my-1 me-1">
+                    <a href="{% url 'profiles:friends' %}" title="Friends" class="fas fa-user-friends nav-link p-1 icon-lg" title="My friends"></a>
+                </li>
+                <li class="nav-item home p-1 my-1 me-1">
+                    <a href="{% url 'posts:list' %}" title="Home Page" class="fas fa-home nav-link p-1 icon-lg"></a>
+                </li>
+                <li class="nav-item dropstart p-1 me-1">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
                     aria-expanded="false"><img src="{{request.user.get_avatar_url}}" alt="avatar"
                     class="i-avatar"></a>
-                    <ul class="dropdown-menu me-5" aria-labelledby="userDropdown">
-                        <li><a href="{% url 'profiles:detail' request.user.pk %}"
-                            class="dropdown-item text-primary">Profile</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a href="{% url 'authenticate:logout' %}" class="dropdown-item text-danger">Log Out</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="nav-item ms-3">
-                        <a class="nav-link fas fa-bell icon position-relative" data-bs-toggle="offcanvas" href="#notifications"
-                        role="button" aria-controls="notifications">
-                        {% if notifications.count > 0 %}
-                        <span class="position-absolute text-white bg-danger top-0 end-0 px-1 notification-count" style="border-radius: 50%; font-size: .7em;">{{notifications.count}}</span>
-                        {% endif %}
+                    <ul class="dropdown-menu position-absolute" aria-labelledby="userDropdown" style="z-index: 1;">
+                        <li>
+                            <a href="{% url 'profiles:detail' request.user.pk %}"
+                            class="dropdown-item text-primary">Profile</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'profiles:update' request.user.pk %}" class="dropdown-item text-primary">Update Profile</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a href="{% url 'authenticate:logout' %}" class="dropdown-item text-danger">Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item p-1 me-2">
+                    <a class="nav-link fas fa-bell icon-lg p-0 position-relative" data-bs-toggle="offcanvas" href="#notifications" role="button" aria-controls="notifications">
+                    {% if notifications.count > 0 %}
+                    <span class="position-absolute text-white bg-danger top-0 end-0 px-1 notification-count" style="border-radius: 50%; font-size: .7em;">{{notifications.count}}</span>
+                    {% endif %}
                     </a>
                 </li>
+                {% else %}
+                <li class="nav-item p-1 my-1 me-1">
+                    <a href="{% url 'authenticate:login' %}" class="fs-5 btn btn-outline-primary">Login</a>
+                </li>
+                <li class="nav-item p-1 my-1 me-1">
+                    <a href="{% url 'authenticate:register' %}" class="fs-5 btn btn-outline-primary">Register</a>
+                </li>
+                {% endif %}
             </ul>
-        </ul>
+        </div>
     </div>
-</div>
 </nav>
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="notifications" aria-labelledby="offcanvasExampleLabel">

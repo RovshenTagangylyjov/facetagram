@@ -5,6 +5,7 @@ from django.urls import reverse
 import datetime
 from helpers.image_compression import get_compressed_image_content
 from django.templatetags.static import static
+from django.utils.translation import gettext, gettext_lazy as _
 
 
 GENDER = (
@@ -15,7 +16,7 @@ GENDER = (
 
 
 class User(AbstractUser):
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     country = models.CharField(max_length=100, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=6, choices=GENDER, null=True, blank=True)

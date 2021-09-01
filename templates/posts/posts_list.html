@@ -6,15 +6,15 @@
 
 {% include 'nav.html' %}
 
-<div class="nav position-fixed bottom-0 end-0 d-flex justify-content-end align-items-center h-auto mb-3 me-5">
-    <div class="add-post">
-        <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><i class="fas fa-plus big-plus fa-4x"></i></button>
+<nav class="position-fixed bottom-0 vw-100 shadow bg-white d-flex justify-content-center align-items-center">
+    <div class="big-plus">
+        <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><span class="fas fa-plus big-plus fa-4x"></span></button>
     </div>
-</div>
+</nav>
 
 <form method="POST" action="{% url 'posts:create' %}"  class="modal fade" id="add-post" tabindex="-1" aria-labelledby="add-post" aria-hidden="true" enctype="multipart/form-data">{% csrf_token  %}
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content mx-3">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Add Post</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -46,56 +46,46 @@
     </div>
 </form>
 
-<section class="posts d-flex flex-column mx-auto infinite-container">
+<section class="d-flex flex-column mx-auto infinite-container mt-2 w-100 d-flex align-items-center" style="margin-bottom: 7em;">
     {% for post in posts %}
-    <div class="post d-flex flex-column bg-white py-2 my-1 infinite-item" id="{{post.id}}">
-        <header class="container px-3">
-            <div class="row  align-items-center">
-                <div class="col-1 ps-3 pe-0">
-                    <a class="col-1 ms-1" href="{% url 'profiles:detail' post.user.pk %}">
-                        <img class="i-avatar fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
-                    </a>
-                </div>
-                <div class="col-9">
-                    <a class="name m-0 link-dark text-decoration-none h5" href="{% url 'profiles:detail' post.user.pk %}">{{post.user}}</a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-1"></div>
+    <div class="card post bg-white m-0 py-2 my-1 infinite-item shadow" id="{{post.id}}">
+        <div class="card-header d-flex align-items-center">
+            <a class="px-1" href="{% url 'profiles:detail' post.user.pk %}">
+                <img class="avatar-sm fs-3" src="{{post.user.get_avatar_url}}" alt="avatar">
+            </a>
+            <div class="ms-2 flex-grow-1 d-flex flex-column align-items-start justify-content-evenly">
+                <a class="name m-0 link-dark text-decoration-none fw-bold" style="font-size: 1.2em;" href="{% url 'profiles:detail' post.user.pk %}">{{post.user}}</a>
                 {% if post.location %}
-                <p class="small col-10 mb-1">{{post.location}}</p>
+                <p class="small col-10 mb-1 fw-light lh-1">{{post.location}}</p>
                 {% else %}
                 <div class="mb-2"></div>
                 {% endif %}
             </div>
-        </header>
-        <div class="breaker w-100 mb-2"></div>
-        <figure class="figure post-image" onclick="window.location='{% url 'posts:detail' post.pk %}'">
-            <div class="bg-image" style="background-image: url({{post.image.url}});"></div>
-            <div class="blur"></div>
-            <img src="{{post.image.url}}" alt="post" class="position-absolute start-50 top-50 translate-middle">
+        </div>
+        <figure class="figure post-image card-img d-flex align-content-center justify-content-center m-auto" onclick="window.location='{% url 'posts:detail' post.pk %}'">
+            <img src="{{post.image.url}}" alt="post" class="figure-img img-fluid mx-auto">
         </figure>
-        <footer class="py-1 px-3 w-100">
-            <div class="d-flex justify-content-between">
-                <div class="thumbs">
-                    <i class="btn {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</i>
-                    <i class="btn {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</i>
+        <div class="card-body pb-1 pt-0">
+            <div class="links d-flex justify-content-between mb-1 pt-0">
+                <div class="thumbs d-flex align-items-center">
+                    <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
+                    <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
                 </div>
                 <div>
                     <a href="{% url 'posts:detail' post.pk %}" class="btn link-dark text-decoration-none">
-                        <small class="me-1 c{{post.id}}">{{post.get_comment_count}}</small>
-                        <i class="text-primary fas fa-comment-alt"></i>
+                        <small class="me-1 c{{post.id}} icon-sm">{{post.get_comment_count}}</small>
+                        <span class="text-primary fas fa-comment-alt icon-sm"></span>
                     </a>
                 </div>
-            </div>     
-            <div class="breaker"></div>
+            </div>
             {% if post.description %}
-            <p class="description text-truncate px-3 mt-1 mb-0">{{post.description}}</p>
-            {% endif %}
-        </footer>
-        <div class="input-group my-2 mx-4">
-            <input type="text" class="form-control comment-input{{post.id}}" placeholder="Comment" id="{{post.id}}">
-            <button type="submit" class="btn btn-outline-primary input-group-text comment-submit me-5 fas fa-paper-plane" id="{{post.id}}"></button>
+            <div class="row" onclick="window.location='{% url 'posts:detail' post.pk %}'">
+                <p class="card-text text-truncate col fw-bold">{{post.description}}</p>  
+            </div>
+            {% endif %}     
+        </div>
+        <div class="card-footer text-muted text-end">
+            2 days ago
         </div>
     </div>
     <div class="pagination">
@@ -174,15 +164,6 @@
                     comment_count.textContent = data['comment_count']
                 }
             }
-            xhr.send(JSON.stringify({ id: event.target.id, value: value }));
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState != 4) return;
-                if (xhr.status == 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    thumbs[0].textContent = data['likes'];
-                    thumbs[1].textContent = data['dislikes'];
-                }
-            };
         }
         
         document
@@ -198,38 +179,18 @@
         rates.forEach((rate) => {
             rate.addEventListener('click',  sendRate);
         });
-        
-        commentBtns = document.querySelectorAll('.comment-submit');
-        commentBtns.forEach(btn => {
-            btn.addEventListener('click', sendComment)
-        });
-        
+
         var infinite = new Waypoint.Infinite({
             element: $('.infinite-container')[0],
             offset: 'bottom-in-view',
             onBeforePageLoad: () => {
-                rates = document.querySelectorAll('.rate');
-                rates.forEach(rate => {
-                    rate.removeEventListener('click', sendRate);
-                })  
-                
-                commentBtns = document.querySelectorAll('.comment-submit');
-                commentBtns.forEach(btn => {
-                    btn.removeEventListener('click', sendComment);
-                })
             },
             onAfterPageLoad: () => {
                 
                 rates = document.querySelectorAll('.rate');
                 rates.forEach(rate => {
                     rate.addEventListener('click', sendRate);
-                })  
-                
-                commentBtns = document.querySelectorAll('.comment-submit');
-                commentBtns.forEach(btn => {
-                    btn.addEventListener('click', sendComment);
-                })
-                
+                })    
             },
         })
         

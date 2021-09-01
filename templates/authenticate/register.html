@@ -1,56 +1,58 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}facetagram|registration{% endblock %}
+{% block title %}facetagram | registration{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/custom/register.css' %}">
-<form method="POST" class="d-flex flex-column align-items-center mx-auto p-3 position-relative mt-5">{% csrf_token %}
+<form method="POST" class="shadow d-flex flex-column align-items-center justify-content-center py-3 px-5 position-absolute rounded-3 translate-middle-x start-50">
+    {% csrf_token %}
+    <div class="row justify-content-center border-bottom pb-3">
+        <img src="{% static 'favicon.ico' %}" alt="icon" class="icon-lg">
+    </div>
     <div class="row mt-3">
-        <label for="email" class="form-label">Email</label>
+        <label for="email" class="form-label ps-0 mb-1">Email:</label>
         <div class="input-group has-validation">
-            <i class="input-group-text far fa-envelope text-primary" id="email-icon"></i>
-            <input type="email" class="form-control" id="email" name="email" autocomplete="email" value='{{form.email.value|default_if_none:""}}' aria-describedby="email-feedback email-icon" required autofocus>
+            <span class="input-group-text far fa-envelope text-white bg-primary" id="email-icon"></span>
+            <input type="email" class="form-control {% if form.errors.email %} is-invalid {% elif request.POST %} is-valid {% endif %}" id="email" name="email" autocomplete="email" value='{{form.email.value|default_if_none:""}}' aria-describedby="email-feedback email-icon" required autofocus>
             <div class="invalid-feedback" id="email-feedback">
                 {{form.errors.email}}
             </div>
         </div>
     </div>
-    
     <div class="row mt-3">
-        <label for="username" class="form-label">Username</label>
+        <label for="username" class="form-label ps-0  mb-1">Username:</label>
         <div class="input-group has-validation">
-            <i class="input-group-text far fa-user text-primary" id="username-icon"></i>
-            <input type="text" class="form-control" id="username" name="username" autocomplete="username" value='{{form.username.value|default_if_none:""}}' aria-describedby="username-feedback username-icon" required>
+            <span class="input-group-text far fa-user text-white bg-primary" id="username-icon"></span>
+            <input type="text" class="form-control {% if form.errors.username %} is-invalid {% elif request.POST %} is-valid {% endif %}" id="username" name="username" autocomplete="username" value='{{form.username.value|default_if_none:""}}' aria-describedby="username-feedback username-icon" required>
             <div class="invalid-feedback" id="username-feedback">
                 {{form.errors.username}}
             </div>
         </div>
     </div>
-    
     <div class="row mt-3">
-        <label for="password" class="form-label">Password</label>
+        <label for="password" class="form-label ps-0  mb-1">Password:</label>
         <div class="input-group has-validation">
-            <i class="input-group-text fas fa-key text-primary" id="password1-icon"></i>
-            <input type="password" class="form-control" id="password1" name="password1" autocomplete="new_password" aria-describedby="password1-feedback password1-icon" required>
+            <span class="input-group-text fas fa-key text-white bg-primary" id="password1-icon"></span>
+            <input type="password" class="form-control {% if form.errors.password %} is-invalid {% endif %}" id="password1" name="password1" autocomplete="new_password" aria-describedby="password1-feedback password1-icon" required>
             <div class="invalid-feedback" id="password1-feedback">
                 {{form.errors.password}}
             </div>
         </div>
     </div>
-    
     <div class="row mt-3">
-        <label for="password2" class="form-label">Confirm Password</label>
+        <label for="password2" class="form-label ps-0  mb-1">Confirm Password:</label>
         <div class="input-group has-validation">
-            <i class="input-group-text fas fa-key text-primary" id="password2-icon"></i>
-            <input type="password" class="form-control" id="password2" name="password2" autocomplete="off" aria-describedby="password2-feedback password2-icon" required>
+            <span class="input-group-text fas fa-key text-white bg-primary" id="password2-icon"></span>
+            <input type="password" class="form-control {% if form.errors.password2 %} is-invalid {% endif %}" id="password2" name="password2" autocomplete="off" aria-describedby="password2-feedback password2-icon" required>
             <div class="invalid-feedback" id="password2-feedback">
                 {{form.errors.password2}}
             </div>
         </div>
     </div>
     <div class="row my-3">
-        <input type="submit" class="btn btn-primary" value="Register">
+        <input type="submit" class="btn btn-primary w-100" value="Register">
     </div>
-    <footer class="position-absolute bottom-0 mb-1 w-100 text-center">Already have an accaunt? Please <a href="{% url 'authenticate:login' %}">login</a>
+    <footer class="my-1 w-100 text-center">
+        Already have an accaunt? Please <a href="{% url 'authenticate:login' %}" class="text-decoration-none">login</a>
     </footer>
 </form>
 {% endblock %}

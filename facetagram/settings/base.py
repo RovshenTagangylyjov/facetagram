@@ -148,4 +148,4 @@ AUTH_USER_MODEL = 'profiles.User'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_REDIRECT_URL = 'posts:list'
 LOGIN_URL = 'authenticate:login'
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # One month
+# SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # One month
