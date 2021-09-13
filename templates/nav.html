@@ -3,20 +3,17 @@
 <nav class="navbar navbar-expand-sm navbar-primary bg-white position-sticky top-0 py-0">
     <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'home' %}">facetagram</a>
-        <button class="navbar-toggler btn btn-outline-primary" type="button" data-bs-toggle="collapse"
-        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-        aria-label="Toggle navigation">
+        <button class="navbar-toggler btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="fas fa-bars icon-lg"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav flex-row justify-content-evenly justify-content-sm-end align-items-center w-100">
-                {% if request.user.is_authenticated %}
-                <li class="nav-item search-profile p-1 my-1 me-1">
-                    <a href="{% url 'profiles:search_profile' %}" title="Find users" class="fas fa-search nav-link p-1 icon-lg"
+                <li class="nav-item profiles p-1 my-1 me-1">
+                    <a href="{% url 'profiles:list' %}" title="Find users" class="fas fa-search nav-link p-1 icon-lg"
                     title="Find new friends"></a>
                 </li>
                 <li class="nav-item friends p-1 my-1 me-1">
-                    <a href="{% url 'profiles:friends' %}" title="Friends" class="fas fa-user-friends nav-link p-1 icon-lg" title="My friends"></a>
+                    <a href="{% url 'profiles:list' %}?filter=friends" title="Friends" class="fas fa-user-friends nav-link p-1 icon-lg" title="My friends"></a>
                 </li>
                 <li class="nav-item home p-1 my-1 me-1">
                     <a href="{% url 'posts:list' %}" title="Home Page" class="fas fa-home nav-link p-1 icon-lg"></a>
@@ -43,19 +40,9 @@
                 </li>
                 <li class="nav-item p-1 me-2">
                     <a class="nav-link fas fa-bell icon-lg p-0 position-relative" data-bs-toggle="offcanvas" href="#notifications" role="button" aria-controls="notifications">
-                    {% if notifications.count > 0 %}
-                    <span class="position-absolute text-white bg-danger top-0 end-0 px-1 notification-count" style="border-radius: 50%; font-size: .7em;">{{notifications.count}}</span>
-                    {% endif %}
+                        <span class="d-none position-absolute text-white bg-danger top-0 end-0 px-1 notification-count" style="border-radius: 50%; font-size: .7em;"></span>
                     </a>
                 </li>
-                {% else %}
-                <li class="nav-item p-1 my-1 me-1">
-                    <a href="{% url 'authenticate:login' %}" class="fs-5 btn btn-outline-primary">Login</a>
-                </li>
-                <li class="nav-item p-1 my-1 me-1">
-                    <a href="{% url 'authenticate:register' %}" class="fs-5 btn btn-outline-primary">Register</a>
-                </li>
-                {% endif %}
             </ul>
         </div>
     </div>
@@ -69,7 +56,7 @@
     <div class="offcanvas-body m-auto">
         <div class="toast-container">
             {% for notification in notifications %}
-            <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true" id="toast{{notification.id}}">
+            <div class="toast show toast{{notification.id}}" role="alert" aria-live="assertive" aria-atomic="true" id="{{notification.id}}">
                 <div class="toast-header">
                     <a href="{% url 'profiles:detail' notification.sender.id %}" class="user" id="{{notification.sender.id}}">
                         <img src="{{notification.sender.get_avatar_url}}" class="rounded me-2 avatar" alt="avatar">
@@ -94,35 +81,82 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        delNotification = () => {
+        reduceCounter = () => {
             counter = document.querySelector('.notification-count');
             counter.textContent -= 1;
             if (counter.textContent == 0){
                 counter.style.display = 'none';
             }
         }
-        document.querySelectorAll('.accept').forEach(accept => accept.addEventListener('click', event => {
-            toast = document.querySelector('#toast'+event.target.id);
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', "{% url 'profiles:create_friendship' %}", true);
-            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({ user: toast.querySelector('.user').id, notification: event.target.id}));
-            toast.remove()
-            delNotification();
-            
-        }))
         
-        document.querySelectorAll('.deny').forEach(deny => deny.addEventListener('click', event => {
-            toast = document.querySelector('#toast'+event.target.id);
+        responseSystem = () =>{
+            document.querySelectorAll('.accept').forEach(accept => accept.addEventListener('click', event => {
+                toast = document.querySelector(".toast-container").querySelector(".toast" + event.target.id);
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', "{% url 'profiles:create_friendship' %}", true);
+                xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ user: toast.querySelector('.user').id, notification: event.target.id}));
+                toast.remove()
+                reduceCounter();
+                
+            }))
+            
+            document.querySelectorAll('.deny').forEach(deny => deny.addEventListener('click', event => {
+                toast = document.querySelector(".toast-container").querySelector(".toast" + event.target.id);
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', "{% url 'profiles:friend_request' %}", true);
+                xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ profile_id: toast.querySelector('.user').id, value: 'deny'}));
+                toast.remove()
+                reduceCounter();
+            }))
+        }
+        
+        setInterval(() => {
+            toastContainer = document.querySelector(".toast-container")
+            lastNotification = toastContainer.querySelector(".toast");
+            lastNotificationId = -1
+            if (lastNotification != null) lastNotificationId = lastNotification.id
             let xhr = new XMLHttpRequest();
-            xhr.open('POST', "{% url 'profiles:friend_request' %}", true);
+            xhr.open('POST', "{% url 'profiles:get_notifications' %}", true);
             xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
             xhr.setRequestHeader('Content-Type', 'application/json');
-            console.log(event.target.id)
-            xhr.send(JSON.stringify({ profile_id: toast.querySelector('.user').id, value: 'deny'}));
-            toast.remove()
-            delNotification();
-        }))
+            xhr.send(JSON.stringify({last_notification_id: lastNotificationId}));
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState != 4) return;
+                if (xhr.status == 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    if (Object.keys(data).length != 0){
+                        for (i in data){
+                            if (lastNotificationId == -1) toastContainer.innerHTML = "";
+                            avatar = data[i].sender_avatar;
+                            if (avatar == "") avatar = data[i].default_avatar
+                            toastContainer.innerHTML = `<div class="toast show toast${data[i].id}" role="alert" aria-live="assertive" aria-atomic="true" id="${data[i].id}">
+                                <div class="toast-header">
+                                    <a href="/profiles/detail/${data[i].sender_id}" class="user" id="${data[i].sender_id}">
+                                        <img src="${avatar}" class="rounded me-2 avatar" alt="avatar">
+                                    </a>
+                                    <strong class="me-auto">${data[i].sender_username}</strong>
+                                    <small class="text-muted">${data[i].date_created}</small>
+                                </div>
+                                <div class="toast-body">
+                                    Friend request
+                                    <div class="mt-3 pt-3 border-top d-flex justify-content-evenly">
+                                        <button class="btn btn-primary w-50 accept" id="${data[i].id}">Accept</button>
+                                        <button class="btn btn-secondary w-50 ms-3 deny" id="${data[i].id}">Deny</button>
+                                    </div>
+                                </div>
+                            </div>` + toastContainer.innerHTML;
+                            counter = document.querySelector('.notification-count');
+                            counter.textContent++;
+                            counter.classList.remove("d-none");
+                        };
+                        responseSystem();
+                    };
+                };
+            };
+        }, 5000)
     })
 </script>

@@ -1,10 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Detail{% endblock %}
+{% block title %}Post Detail{% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
-{% include 'nav.html' %}
-{% comment %} <a href="javascript:history.back()" class="fas fa-arrow-left link-dark text-decoration-none m-4 ms-5 fa-2x" style="color: rgb(180, 180, 180);"></a> {% endcomment %}
 <div class="detail card post bg-white my-4 mx-auto shadow" id="{{post.id}}">
     <div class="card-header d-flex align-items-center">
         <a class="px-1" href="{% url 'profiles:detail' post.user.pk %}">
@@ -25,8 +22,8 @@
     <div class="card-body py-1">
         <div class="links d-flex justify-content-between mb-1 pt-0">
             <div class="thumbs d-flex align-items-center">
-                <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
-                <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
+                <span class="btn icon-sm {% if post.is_liked %}text-primary fas{% else %}far{% endif %} fa-thumbs-up post-rate rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
+                <span class="btn icon-sm {% if post.is_disliked %}text-danger fas{% else %}far{% endif %} fa-thumbs-down post-rate rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
             </div>
             <div>
                 <a href="{% url 'posts:detail' post.pk %}" class="btn link-dark text-decoration-none">
@@ -61,9 +58,9 @@
             </header>
             <p class="p-0 m-0 py-3 mx-3">{{comment.text}}</p>
             <footer>
-                <div class="comment-thumbs">
-                    <i class="btn {% for like in comment_likes %}{% if like.user == request.user and like.comment == comment %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up comment-rate rate like c{{comment.id}}" id="{{comment.id}}">{{comment.get_like_count}}</i>
-                    <i class="btn {% for like in comment_likes %}{% if like.user == request.user and like.comment == comment %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down comment-rate rate dislike c{{comment.id}}" id="{{comment.id}}">{{comment.get_dislike_count}}</i>
+                <div class="thumbs">
+                    <i class="btn {% if comment.is_liked %}text-primary fas{% else %}far{% endif %} fa-thumbs-up comment-rate rate like c{{comment.id}}" id="{{comment.id}}">{{comment.get_like_count}}</i>
+                    <i class="btn {% if comment.is_disliked %}text-danger fas{% else %}far{% endif %} fa-thumbs-down comment-rate rate dislike c{{comment.id}}" id="{{comment.id}}">{{comment.get_dislike_count}}</i>
                 </div>
             </footer>
         </li>
@@ -86,55 +83,61 @@
                 xhr.onreadystatechange = () => window.location = "{% url 'posts:list' %}"
             });
         });
-        rates = document.querySelectorAll('.rate');
-        rates.forEach((rate) => {
-            rate.addEventListener('click', (event) => {
-                let xhr = new XMLHttpRequest();
-                let thumbs = 0;
-                if (event.target.classList.contains('comment-rate')){
-                    thumbs = document.querySelectorAll('.c' + event.target.id);
-                    xhr.open('POST', "{% url 'posts:like_comment' %}", true);
-                }else{                        
-                    thumbs = document.querySelectorAll('.p' + event.target.id);
-                    xhr.open('POST', "{% url 'posts:like_post' %}", true);
-                }
-                xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                if (event.target.classList.contains('like')) {
-                    if (event.target.classList.contains('fas')) {
-                        event.target.classList.remove('fas', 'text-primary');
-                        event.target.classList.add('far');
-                        value = 0;
-                    } else {
-                        event.target.classList.add('fas', 'text-primary');
-                        value = 1;
-                        if (thumbs[1].classList.contains('fas')) {
-                            thumbs[1].classList.remove('fas', 'text-danger');
-                        }
-                    }
+
+        sendRate = (event) => {
+            if (event.target.classList.contains("post-rate")){
+                type = "post"
+            } else{
+                type = "comment"
+            }
+            let xhr = new XMLHttpRequest();
+            let thumbs;
+            if (type == "post"){
+                xhr.open('POST', "{% url 'posts:like_post' %}", true);
+                thumbs = document.querySelectorAll('.p' + event.target.id);
+            } else{
+                xhr.open('POST', "{% url 'posts:like_comment' %}", true);
+                thumbs = document.querySelectorAll('.c' + event.target.id);
+            }
+            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            if (event.target.classList.contains('like')) {
+                if (event.target.classList.contains('fas')) {
+                    event.target.classList.remove('fas', 'text-primary');
+                    event.target.classList.add('far');
+                    value = 0;
                 } else {
-                    if (event.target.classList.contains('fas')) {
-                        event.target.classList.remove('fas', 'text-danger');
-                        event.target.classList.add('far');
-                        value = 0;
-                    } else {
-                        event.target.classList.add('fas', 'text-danger');
-                        value = -1;
-                        if (thumbs[0].classList.contains('fas')) {
-                            thumbs[0].classList.remove('fas', 'text-primary');
-                        }
+                    event.target.classList.add('fas', 'text-primary');
+                    value = 1;
+                    if (thumbs[1].classList.contains('fas')) {
+                        thumbs[1].classList.remove('fas', 'text-danger');
                     }
                 }
-                xhr.send(JSON.stringify({ id: event.target.id, value: value }));
-                xhr.onreadystatechange = () => {
-                    if (xhr.readyState != 4) return;
-                    if (xhr.status == 200) {
-                        const data = JSON.parse(xhr.responseText);
-                        thumbs[0].textContent = data['likes'];
-                        thumbs[1].textContent = data['dislikes'];
+            } else {
+                if (event.target.classList.contains('fas')) {
+                    event.target.classList.remove('fas', 'text-danger');
+                    event.target.classList.add('far');
+                    value = 0;
+                } else {
+                    event.target.classList.add('fas', 'text-danger');
+                    value = -1;
+                    if (thumbs[0].classList.contains('fas')) {
+                        thumbs[0].classList.remove('fas', 'text-primary');
                     }
-                };
-            });
+                }
+            }
+            xhr.send(JSON.stringify({ id: event.target.id, value: value }));
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState != 4) return;
+                if (xhr.status == 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    thumbs[0].textContent = data['likes'];
+                    thumbs[1].textContent = data['dislikes'];
+                }
+            };
+        };
+        document.querySelectorAll('.rate').forEach((rate) => {
+            rate.addEventListener('click',  sendRate);
         });
     });
 </script>

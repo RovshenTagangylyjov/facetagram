@@ -1,11 +1,12 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-from django.urls import reverse
-import datetime
-from helpers.image_compression import get_compressed_image_content
 from django.templatetags.static import static
-from django.utils.translation import gettext, gettext_lazy as _
+from django.urls import reverse
+
+from helpers.image_compression import get_compressed_image_content
 
 
 GENDER = (
@@ -23,6 +24,7 @@ class User(AbstractUser):
     biography = models.TextField(max_length=10000, null=True, blank=True)
     avatar = models.ImageField(upload_to='avatars', null=True, blank=True,)
     is_private = models.BooleanField(default=False, blank=True)
+    friends = models.ManyToManyField("self")
 
     def get_age(self):
         today = datetime.date.today()
@@ -39,18 +41,14 @@ class User(AbstractUser):
             return static('img/default_avatar.png')
         return self.avatar.url
 
+    def generate_room_id(self, user_id) -> int:
+        users = sorted([self.id, user_id])
+        return int('0'.join([str(users[0]), str(users[1])]))
+
+
     @staticmethod
     def get_absolute_url():
         return reverse('posts:list')
-
-
-class Friendship(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                             related_query_name='my_friend', related_name='my_friend')
-    friend = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                               related_query_name='i_friend', related_name='i_friend')
-    room_id = models.IntegerField()
-    since = models.DateTimeField(auto_now_add=True)
 
 
 class Notification(models.Model):

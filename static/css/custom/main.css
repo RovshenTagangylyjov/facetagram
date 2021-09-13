@@ -23,21 +23,6 @@ html {
 	min-height: 30em;
 }
 
-/* .bg-img {
-	position: absolute;
-	background-position: center;
-	background-size: cover;
-	background-repeat: no-repeat;
-	width: 100%;
-	height: 100%;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	filter: blur(5px) grayscale(40%) brightness(80%);
-	-webkit-filter: blur(5px) grayscale(40%) brightness(80%);
-	border: 5px solid #ffffff;
-} */
-
 .big-plus {
 	z-index: 10;
 	background: linear-gradient(
@@ -80,6 +65,7 @@ html {
 }
 
 .chat .messages .message .avatar{
+	border-radius: 50%;
 	width: 2em;
 	height: 2em;
 }
@@ -87,6 +73,34 @@ html {
 .chat .messages .message .text {
 	max-width: 100%;
 	overflow-wrap: break-word;
+}
+
+
+.autocomplete-items {
+	position: absolute;
+	border: 1px solid #d4d4d4;
+	border-bottom: none;
+	border-top: none;
+	z-index: 99;
+	top: 100%;
+	left: 0;
+	right: 0;
+}
+
+.autocomplete-items div {
+	padding: 10px;
+	cursor: pointer;
+	background-color: #fff;
+	border-bottom: 1px solid #d4d4d4;
+}
+
+.autocomplete-items div:hover {
+	background-color: #e9e9e9;
+}
+
+.autocomplete-active {
+	background-color: DodgerBlue !important;
+	color: #ffffff;
 }
 
 .icon-sm{
@@ -104,6 +118,7 @@ html {
 }
 
 .avatar-md{
+	border-radius: 50%;
 	width: 3em;
 	height: 3em;
 }
@@ -132,11 +147,15 @@ html {
 	}
 	.chat{
 		width: 100vw;
-		height: 100vh;
+		height: 90vh;
+	}
+	.messages{
+		padding-bottom: 5em;
 	}
 	.chat .input-group{
 		position: fixed;
 		bottom: 0;
+		font-size: 3em;
 	}
 }
 

@@ -1,17 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}facetagram{% endblock %}
+{% block title %}Post List{% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
-
-{% include 'nav.html' %}
-
 <nav class="position-fixed bottom-0 vw-100 shadow bg-white d-flex justify-content-center align-items-center">
     <div class="big-plus">
         <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><span class="fas fa-plus big-plus fa-4x"></span></button>
     </div>
 </nav>
-
 <form method="POST" action="{% url 'posts:create' %}"  class="modal fade" id="add-post" tabindex="-1" aria-labelledby="add-post" aria-hidden="true" enctype="multipart/form-data">{% csrf_token  %}
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content mx-3">
@@ -20,10 +15,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <figure class="figure post-image mb-3 d-none" id="post-figure">
-                    <div class="bg-image"></div>
-                    <div class="blur"></div>
-                    <img alt="post" id='post-img' class="position-absolute start-50 top-50 translate-middle">
+                <figure id="post-figure" class="figure post-image d-none align-content-center justify-content-center m-auto">
+                    <img alt="post" id="post-img" class="figure-img img-fluid mx-auto">
                 </figure>
                 <div class="mb-3">
                     <label class="fw-bold" for="image" class="col-form-label">Select Image:</label>
@@ -68,8 +61,8 @@
         <div class="card-body pb-1 pt-0">
             <div class="links d-flex justify-content-between mb-1 pt-0">
                 <div class="thumbs d-flex align-items-center">
-                    <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
-                    <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
+                    <span class="btn icon-sm {% if post.is_liked %}fas text-primary{% else %}far{% endif %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
+                    <span class="btn icon-sm {% if post.is_disliked %}fas text-danger{% else %}far{% endif %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
                 </div>
                 <div>
                     <a href="{% url 'posts:detail' post.pk %}" class="btn link-dark text-decoration-none">
@@ -85,7 +78,7 @@
             {% endif %}     
         </div>
         <div class="card-footer text-muted text-end">
-            2 days ago
+            {{post.date_created}}
         </div>
     </div>
     <div class="pagination">
@@ -94,18 +87,23 @@
         {% endif %}
     </div>
     {% empty %}
-    <h5 class="text-center text-muted">No posts</h5>
+    <h5 class="text-center text-muted mt-5">No posts</h5>
     {% endfor %}
 </section>
-<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
-<script src="{% static 'js/infinite.min.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        
         document.querySelector('.home').classList.add('current-page');
-        
+        document
+        .getElementById('post-input')
+        .addEventListener('change', (event) => {
+            figure = document.getElementById('post-figure');
+            figure.classList.remove('d-none');
+            figure.classList.add('d-flex');
+            img = figure.querySelector('#post-img');
+            img.src = URL.createObjectURL(event.target.files[0]);
+        });
+
         sendRate = (event) => {
-            event.target.classList.add('listening');
             let xhr = new XMLHttpRequest();
             xhr.open('POST', "{% url 'posts:like_post' %}", true);
             xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
@@ -146,51 +144,18 @@
                 }
             };
         };
-        
-        sendComment = event => {
-            event.target.classList.add('listening');
-            comment = document.querySelector('.comment-input' + event.target.id)
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', "{% url 'posts:comment' %}", true);
-            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({ id: comment.id, text: comment.value }));
-            comment.value = '';
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState != 4) return;
-                if (xhr.status == 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    comment_count = document.querySelector('.c'+event.target.id);
-                    comment_count.textContent = data['comment_count']
-                }
-            }
-        }
-        
-        document
-        .getElementById('post-input')
-        .addEventListener('change', (event) => {
-            figure = document.getElementById('post-figure');
-            figure.classList.remove('d-none');
-            img = figure.querySelector('#post-img');
-            img.src = URL.createObjectURL(event.target.files[0]);
-        });
-        
-        rates = document.querySelectorAll('.rate');
-        rates.forEach((rate) => {
+        document.querySelectorAll('.rate').forEach((rate) => {
             rate.addEventListener('click',  sendRate);
         });
-
         var infinite = new Waypoint.Infinite({
             element: $('.infinite-container')[0],
             offset: 'bottom-in-view',
             onBeforePageLoad: () => {
             },
             onAfterPageLoad: () => {
-                
-                rates = document.querySelectorAll('.rate');
-                rates.forEach(rate => {
-                    rate.addEventListener('click', sendRate);
-                })    
+                document.querySelectorAll('.rate').forEach((rate) => {
+                    rate.addEventListener('click',  sendRate);
+                });  
             },
         })
         

@@ -10,12 +10,6 @@ class PostForm(forms.ModelForm):
         fields = ['image', 'description', 'location']
 
 
-class UpdatePostForm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = ['image', 'description', 'location']
-
-
 class CommentForm(forms.ModelForm):
     user = forms.HiddenInput
     post = forms.HiddenInput

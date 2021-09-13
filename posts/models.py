@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.db.models.expressions import OrderBy
 from django.urls import reverse
 from django.utils import timezone
 from helpers.image_compression import get_compressed_image_content
@@ -28,6 +29,9 @@ class Post(models.Model):
         if self.image:
             self.image = get_compressed_image_content(self.image, [1024, 720])
         super().save(*args, **kwargs)
+    
+    class Meta:
+        ordering = ["-date_created"]
 
 
 class Comment(models.Model):

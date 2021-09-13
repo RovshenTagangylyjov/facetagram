@@ -1,18 +1,61 @@
 import json
-from django.http import JsonResponse, HttpResponse
+
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView
+from django.db.models.expressions import Exists, OuterRef, Q, Value, F
+from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
-from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.templatetags.static import static
 
 from .forms import UpdateProfileForm
-from .models import User, Notification, Friendship
-from posts.forms import PostForm
+from .models import User, Notification
 from posts.models import LikePost
 from chat.models import Room
+
+
+class ProfileDetailView(LoginRequiredMixin, ListView, SingleObjectMixin):
+    template_name = "profiles/profiles_detail.html"
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        is_friend = Exists(user.friends.filter(pk=OuterRef("pk")))
+        is_waiting = Exists(Notification.objects.filter(sender=user, receiver_id=OuterRef("pk")))
+        self.object = self.get_object(queryset=User.objects.annotate(is_friend=is_friend, is_waiting=is_waiting))
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['profile'] = self.object
+        return context
+
+    def get_queryset(self):
+        user = self.request.user
+        is_liked = Exists(LikePost.objects.filter(user=user, post_id=OuterRef("id"), value=1))
+        is_disliked = Exists(LikePost.objects.filter(user=user, post_id=OuterRef("id"), value=-1))
+        return self.object.post_set.annotate(is_liked=is_liked, is_disliked=is_disliked)
+
+
+class ProfileListView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = 'profiles/profiles_list.html'
+    context_object_name = 'profiles'
+    paginate_by = 20
+
+    def get_queryset(self):
+        user = self.request.user
+        search = self.request.GET.get('search') or ''
+        filter = self.request.GET.get("filter")
+        is_friend = Exists(user.friends.filter(pk=OuterRef("pk")))
+        is_waiting = Exists(Notification.objects.filter(sender=user, receiver_id=OuterRef("pk")))
+        if filter == "friends":
+            return user.friends.filter(username__icontains=search).only('username', 'pk', 'avatar', 'id').annotate(is_friend=is_friend, is_waiting=is_waiting) 
+        return User.objects.filter(username__icontains=search).exclude(pk=user.pk).only('username', 'pk', 'avatar', 'id').annotate(is_friend=is_friend, is_waiting=is_waiting)
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -23,75 +66,6 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         return User.objects.filter(pk=self.request.user.pk)
 
-    def get_context_data(self, **kwargs):
-        context = super(ProfileUpdateView, self).get_context_data(**kwargs)
-        context['notifications'] = Notification.objects.filter(receiver=self.request.user).order_by('-date_created')
-        return context
-
-
-class ProfileDetailView(LoginRequiredMixin, ListView, SingleObjectMixin):
-    template_name = "profiles/profiles_detail.html"
-    context_object_name = 'posts'
-    paginate_by = 3
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=User.objects.all())
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user'] = self.object
-        context['likes'] = LikePost.objects.filter(user=self.request.user)
-        context['form'] = PostForm
-        context['notifications'] = Notification.objects.filter(receiver=self.request.user).order_by('-date_created')
-        context['has_access'] = self.object.my_friend.filter(friend=self.request.user).exists() \
-                                or self.object == self.request.user \
-                                or not self.object.is_private
-        return context
-
-    def get_queryset(self):
-        return self.object.post_set.all()
-
-
-class SearchProfileView(LoginRequiredMixin, ListView):
-    model = User
-    template_name = 'profiles/search_profile.html'
-    context_object_name = 'profiles'
-    paginate_by = 3
-
-    def get_queryset(self):
-        search = self.request.GET.get('search') or ''
-        return User.objects.filter(username__icontains=search).exclude(id=self.request.user.id)
-
-    def get_context_data(self, **kwargs):
-        context = super(SearchProfileView, self).get_context_data(**kwargs)
-        context['notifications'] = Notification.objects.filter(receiver=self.request.user).order_by('-date_created')
-        context['friends'] = User.objects.filter(my_friend__friend=self.request.user)
-        return context
-
-
-# class JSONSearchProfile(LoginRequiredMixin, View):
-#     http_method_names = ['post']
-
-#     def post(self, request):
-#         body = json.loads(request.body)
-#         search = body['search']
-#         user = self.request.user
-#         qs = User.objects.filter(username__istartswith=search).exclude(id=user.id).defer('password')
-#         context = list(qs.values())
-#         for i in range(len(context)):
-#             profile = get_object_or_404(User, id=context[i]['id'])
-#             if Friendship.objects.filter(user=user, friend=profile).exists():
-#                 context[i]['status'] = 'friend'
-#             elif Notification.objects.filter(sender=user, receiver=profile).exists():
-#                 context[i]['status'] = 'waiting'
-#             else:
-#                 context[i]['status'] = 'stranger'
-#             if profile.date_of_birth:
-#                 context[i]['age'] = profile.get_age()
-#             context[i]['avatar'] = profile.get_avatar_url()
-#         return JsonResponse(context, safe=False)
-
 
 class FriendRequest(LoginRequiredMixin, View):
     http_method_names = ['post']
@@ -99,26 +73,23 @@ class FriendRequest(LoginRequiredMixin, View):
     def post(self, request):
         body = json.loads(request.body)
         user = request.user
+        if body["profile_id"] == user.pk:
+            raise PermissionDenied
         friend = get_object_or_404(User, id=body.get('profile_id'))
         value = body.get('value')
-        notification_exists = Notification.objects.filter(sender=friend, receiver=user).exists()
-        if value == 'send' and Friendship.objects.filter(user=user, friend=friend).exists():
-            return JsonResponse({'status': "You're friend alredy"})
-        elif value == 'send' and not notification_exists:
+        is_friend = user.friends.filter(pk=friend.pk)
+        notification_exists = Notification.objects.filter(Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)).exists()
+        if value == 'add' and is_friend:
+            return JsonResponse({})
+        elif value == 'add' and not (notification_exists or is_friend):
             Notification.objects.create(sender=user, receiver=friend)
-        elif value == 'cancel' and notification_exists:
+        elif value == 'cancel' and notification_exists and not is_friend:
             Notification.objects.get(sender=user, receiver=friend).delete()
-        elif value == 'deny' and notification_exists:
+        elif value == 'deny' and notification_exists and not is_friend:
             Notification.objects.get(sender=friend, receiver=user).delete()
-        elif value == 'end-friendship' and Friendship.objects.filter(friend=friend, user=user).exists():
-            user.my_friend.get(friend=friend).delete()
-            user.i_friend.get(user=friend).delete()
-        return JsonResponse({'status': 'OK'})
-
-
-def create_room(user1_id, user2_id):
-    users = sorted([user1_id, user2_id])
-    return int('0'.join([str(users[0]), str(users[1])]))
+        elif value == 'remove' and is_friend:
+            user.friends.remove(friend)
+        return JsonResponse({})
 
 
 class CreateFriendshipView(LoginRequiredMixin, View):
@@ -126,48 +97,55 @@ class CreateFriendshipView(LoginRequiredMixin, View):
 
     def post(self, request):
         body = json.loads(request.body)
-        user1 = request.user
-        user2 = get_object_or_404(User, id=body['user'])
-        room_id = create_room(user1.id, user2.id)
-        if Friendship.objects.filter(user=user1, friend=user2, room_id=room_id).exists():
-            return JsonResponse({'status': "You're friend alredy"})
-        Friendship.objects.create(user=user1, friend=user2, room_id=room_id)
-        Friendship.objects.create(user=user2, friend=user1, room_id=room_id)
+        user = request.user
+        if body["user"] == user.pk:
+            raise PermissionDenied
+        friend = get_object_or_404(User, id=body['user'])
+        room_id = user.generate_room_id(friend.pk)
+        if user.friends.filter(pk=friend.pk).exists():
+            return JsonResponse({})
         if not Room.objects.filter(room_id=room_id).exists():
             Room.objects.create(room_id=room_id)
+        user.friends.add(friend)
         notification = get_object_or_404(Notification, id=body['notification'])
         notification.delete()
-        return JsonResponse({'status': 'ok'})
+        return JsonResponse({})
 
 
-class FriendsView(LoginRequiredMixin, ListView):
-    template_name = 'profiles/friends_list.html'
-    context_object_name = 'friendships'
-    model = User
-    paginate_by = 3
-
-    def get_queryset(self):
-        search = self.request.GET.get('search') or ''
-        return self.request.user.my_friend.filter(friend__username__icontains=search)
-
-    def get_context_data(self, **kwargs):
-        context = super(FriendsView, self).get_context_data(**kwargs)
-        context['notifications'] = Notification.objects.filter(receiver=self.request.user).order_by('-date_created')
-        return context
-
-
-class JSONSearchFriend(LoginRequiredMixin, View):
-    http_method_names = ['post']
+class EndFriendshipView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
 
     def post(self, request):
-        body = json.loads(request.body)
-        search = body['search']
-        user = self.request.user
-        qs = User.objects.filter(username__istartswith=search).exclude(id=user.id).defer('password')
-        context = list(qs.values())
-        for i in range(len(context)):
-            profile = get_object_or_404(User, id=context[i]['id'])
-            context[i]['avatar'] = profile.get_avatar_url()
-            print(context[i])
+        body = json.load(request.body)
+        user = request.user
+        if body["pk"] == user.pk:
+            raise PermissionDenied
+        try:
+            friend = get_object_or_404(User, pk=body["pk"])
+            user.friends.remove(friend)
+        except  ObjectDoesNotExist:
+            return JsonResponse({})
+        return JsonResponse({})
 
-        return JsonResponse(context, safe=False)
+
+class JSONSearchProfile(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request):
+        user = self.request.user
+        body = json.loads(request.body)
+        search = body.get("search")
+        friends = body.get("friends")
+        users = User.objects
+        if friends:
+            users = user.friends
+        return JsonResponse(list(users.filter(username__istartswith=search).exclude(pk=user.pk).values("id", "username")), safe=False)
+
+
+class JSONGetNotifications(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request):
+        user = self.request.user
+        body = json.loads(request.body)
+        return JsonResponse(list(user.receiver.filter(id__gt=body["last_notification_id"]).annotate(sender_username=F("sender__username"), sender_avatar=F("sender__avatar"), default_avatar=Value(static("img/default_avatar.png"))).values()), safe=False)

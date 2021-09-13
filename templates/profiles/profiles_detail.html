@@ -1,53 +1,65 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Detail{% endblock %}
+{% load functions %}
+{% block title %}Profile Detail{% endblock %}
 {% block content %}
-{% include 'nav.html' %}
-<link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
 <section class="profile-detail w-100 container-sm px-3 py-2 bg-white shadow">
     <div class="row p-3 pb-0">
         <div class="col-4 d-flex justify-content-center align-items-center">
             <figure class="figure">
-                <img src="{{user.get_avatar_url}}" alt="avatar" class="figure-img avatar-lg img-fluid">
+                <img src="{{profile.get_avatar_url}}" alt="avatar" class="figure-img avatar-lg img-fluid">
             </figure>
         </div>
         <div class="col-8 d-flex flex-column justify-content-center">
             <div class="d-flex">
                 <label class="fw-bold me-2" for="username">Username:</label>
-                <p>{{user.username}}</p>
+                <p>{{profile.username}}</p>
             </div>
-            {% if user.get_full_name %}
+            {% if profile.get_full_name %}
             <div class="d-flex">
                 <label class="fw-bold me-2" for="Full Name">Name:</label>
-                <p>{{user.get_full_name}}</p>
+                <p>{{profile.get_full_name}}</p>
             </div>
             {% endif %}
             
-            {% if user.date_of_birth %}
+            {% if profile.date_of_birth %}
             <div class="d-flex">
                 <label class="fw-bold me-2" for="date_of_birth">Birthday:</label>
                 <p>{{user.date_of_birth}}</p>
             </div>
             {% endif %}
             
-            {% if user.country %}
+            {% if profile.country %}
             <div class="d-flex">
                 <label class="fw-bold me-2" for="country">Country:</label>
-                <p>{{user.country}}</p>
+                <p>{{profile.country}}</p>
             </div>
             {% endif %}
             <div class="d-flex">
                 <label class="fw-bold me-2" for="friends">Friends:</label>
-                <p>{{user.my_friend.count}}</p>
+                <p>{{profile.friends.count}}</p>
             </div>
         </div>
     </div>
     <div class="row p-3 pt-0">
-        <p>{{user.biography}}</p>
+        <p>{{profile.biography}}</p>
     </div>
+    {% if not request.user == profile %}
+    <div class="d-flex justify-content-end p-2">
+        {% if profile.is_friend %}
+        {% generate_room_id request.user.pk profile.pk as room_id %}
+        <a href="{% url 'chat:room' room_id %}" class="btn btn-primary fas fa-envelope room-link" id="link{{profile.pk}}"></a>
+        <button class="btn btn-danger fas fa-user-minus remove request ms-1" id="{{profile.pk}}"></button>
+        {% elif profile.is_waiting %}
+        <button class="btn btn-warning fas fa-user-minus cancel request" id="{{profile.pk}}"></button>
+        {% else %}
+        <button class="btn btn-primary fas fa-user-plus add request" id="{{profile.pk}}"></button>
+        {% endif %}
+    </div>
+    {% endif %}
 </section>
 
-{% if user.pk == request.user.pk %}
+{% if profile == request.user %}
 <nav class="position-fixed bottom-0 vw-100 shadow bg-white d-flex justify-content-center align-items-center">
     <div class="big-plus">
         <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><span class="fas fa-plus big-plus fa-4x"></span></button>
@@ -88,8 +100,8 @@
 </form>
 {% endif %}
 
-{% if has_access %}
 <section class="d-flex flex-column mx-auto infinite-container mt-2 w-100 d-flex align-items-center" style="margin-bottom: 7em;">
+{% if profile == request.user  or request.user in profile.friends.all or not profile.is_private %}
     {% for post in posts %}
     <div class="card post bg-white m-0 py-2 my-1 infinite-item shadow" id="{{post.id}}">
         <div class="card-header d-flex align-items-center">
@@ -104,6 +116,7 @@
                 <div class="mb-2"></div>
                 {% endif %}
             </div>
+            <button class="btn btn-outline-danger justify-self-end delete fas fa-trash-alt" id="{{post.id}}"></button>
         </div>
         <figure class="figure post-image card-img d-flex align-content-center justify-content-center m-auto" onclick="window.location='{% url 'posts:detail' post.pk %}'">
             <img src="{{post.image.url}}" alt="post" class="figure-img img-fluid mx-auto">
@@ -111,8 +124,8 @@
         <div class="card-body pb-1 pt-0">
             <div class="links d-flex justify-content-between mb-1 pt-0">
                 <div class="thumbs d-flex align-items-center">
-                    <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == 1 %} text-primary fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
-                    <span class="btn icon-sm {% for like in likes %}{% if like.user == request.user and like.post == post %}{% if like.value == -1 %} text-danger fas {% else %} far {% endif %}{% else %} far {% endif %}{% empty %} far {% endfor %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
+                <span class="btn icon-sm {% if post.is_liked %}fas text-primary{% else %}far{% endif %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
+                    <span class="btn icon-sm {% if post.is_disliked %}fas text-danger{% else %}far{% endif %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
                 </div>
                 <div>
                     <a href="{% url 'posts:detail' post.pk %}" class="btn link-dark text-decoration-none">
@@ -139,24 +152,17 @@
     {% empty %}
     <h5 class="text-center text-muted">No posts</h5>
     {% endfor %}
+    {% else %}
+    <h1 class="text-primary d-flex flex-column text-center mt-3">
+        <i class="fas fa-lock mb-2" style="font-size:5em;"></i>
+        <label>Private</label>
+    </h1>
 </section>
-{% else %}
-<h1 class="position-absolute top-50 text-primary translate-middle d-flex flex-column text-center" style="left:30%;">
-    <i class="fas fa-lock mb-2" style="font-size:5em;"></i>
-    <label>Private</label>
-</h1>
 {% endif %}
-<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
-<script src="{% static 'js/infinite.min.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        trashes = document.querySelectorAll('.delete');
-        trashes.forEach((trash) => {
-            trash.addEventListener('click', deletePost);
-        })
         
-        deltePost = (event) => {
-            event.target.classList.add('listening');
+        deletePost = (event) => {
             let xhr = new XMLHttpRequest();
             xhr.open('POST', "{% url 'posts:delete' %}", true);
             xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
@@ -166,7 +172,6 @@
         }
         
         sendRate = (event) => {
-            event.target.classList.add('listening');
             let xhr = new XMLHttpRequest();
             xhr.open('POST', "{% url 'posts:like_post' %}", true);
             xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
@@ -207,30 +212,50 @@
                 }
             };
         };
+
+        {% if not request.user == profile %}
+        friendRequest = (event) => {
+            let value = 0;
+            if (event.target.classList.contains('add')){
+                value = 'add';
+                event.target.classList.remove('add', 'btn-primary', 'fa-user-plus');
+                event.target.classList.add('cancel', 'btn-warning', 'fa-user-minus');
+            } else if(event.target.classList.contains('remove')){
+                value = 'remove';
+                event.target.classList.remove('remove', 'btn-danger', 'fa-user-minus');
+                event.target.classList.add('add', 'btn-primary', 'fa-user-plus');
+                document.querySelector(`#link${event.target.id}`).remove();
+            } else{
+                value = 'cancel';
+                event.target.classList.remove('cancel', 'btn-warning', 'fa-user-minus');
+                event.target.classList.add('add', 'btn-primary', 'fa-user-plus');
+            };
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', "{% url 'profiles:friend_request' %}", true);
+            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ profile_id: event.target.id, value: value }));
+        };
         
-        document
-        .getElementById('post-input')
-        .addEventListener('change', (event) => {
+        document.querySelector(".request").addEventListener("click", friendRequest);
+        {% endif %}
+
+        {% if profile == request.user %}
+        document.getElementById('post-input').addEventListener('change', (event) => {
             figure = document.getElementById('post-figure');
             figure.classList.remove('d-none');
             img = figure.querySelector('#post-img');
             img.src = URL.createObjectURL(event.target.files[0]);
         });
+        {% endif %}
         
-        trashes = document.querySelectorAll('.delete');
-        trashes.forEach((trash) => {
-            trash.addEventListener('click', deletePost);
+        document.querySelectorAll('.rate').forEach(rate => {
+            rate.addEventListener('click', sendRate);
+        })  
+        
+        document.querySelectorAll('.delete').forEach((btn) => {
+            btn.addEventListener('click', deletePost);
         })
-        
-        rates = document.querySelectorAll('.rate');
-        rates.forEach((rate) => {
-            rate.addEventListener('click',  sendRate);
-        });
-        
-        commentBtns = document.querySelectorAll('.comment-submit');
-        commentBtns.forEach(btn => {
-            btn.addEventListener('click', sendComment)
-        });
         
         var infinite = new Waypoint.Infinite({
             element: $('.infinite-container')[0],
@@ -240,19 +265,12 @@
             },
             onAfterPageLoad: () => {
                 
-                rates = document.querySelectorAll('.rate');
-                rates.forEach(rate => {
+                document.querySelectorAll('.rate').forEach(rate => {
                     rate.addEventListener('click', sendRate);
                 })  
                 
-                commentBtns = document.querySelectorAll('.comment-submit');
-                commentBtns.forEach(btn => {
-                    btn.addEventListener('click', sendComment);
-                })
-                
-                trashes = document.querySelectorAll('.delete');
-                trashes.forEach((trash) => {
-                    trash.addEventListener('click', deletePost);
+                document.querySelectorAll('.delete').forEach((btn) => {
+                    btn.addEventListener('click', deletePost);
                 })
                 
             },
