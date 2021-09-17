@@ -16,10 +16,15 @@
             {% endif %}
         </div>
     </div>
+    {% if post.image %}
     <figure class="figure post-image card-img d-flex align-content-center justify-content-center m-auto" onclick="window.location='{% url 'posts:detail' post.pk %}'">
         <img src="{{post.image.url}}" alt="post" class="figure-img img-fluid mx-auto">
     </figure>
+    {% endif %}
     <div class="card-body py-1">
+        {% if post.description %}
+        <p class="card-text fw-bold px-3 pt-1 my-1" onclick="window.location='{% url 'posts:detail' post.pk %}'">{{post.description}}</p>
+        {% endif %}     
         <div class="links d-flex justify-content-between mb-1 pt-0">
             <div class="thumbs d-flex align-items-center">
                 <span class="btn icon-sm {% if post.is_liked %}text-primary fas{% else %}far{% endif %} fa-thumbs-up post-rate rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
@@ -32,9 +37,6 @@
                 </a>
             </div>
         </div>
-        {% if post.description %}
-        <p class="card-text fw-bold">{{post.description}}</p>
-        {% endif %}     
         <form method="POST" class="my-3 mt-0">{% csrf_token %}
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="Comment" name="text">

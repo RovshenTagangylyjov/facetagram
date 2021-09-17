@@ -23,3 +23,12 @@ MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
 STATIC_ROOT = os.path.join(BASE_DIR, "assets")
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Cloudinary configs
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": "disbvkli0", 
+    "API_KEY": "135669314646314", 
+    "API_SECRET": "1QCScCqCT2YuzzkSe8bm7nErIiE"
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

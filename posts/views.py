@@ -1,9 +1,11 @@
 import json
+
 from django.core.exceptions import PermissionDenied
+from django.urls.base import reverse_lazy
 from django.views.generic.base import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, UpdateView, FormView
+from django.views.generic.edit import CreateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
@@ -12,7 +14,6 @@ from django.db.models.expressions import Q, Exists, OuterRef
 
 from .models import Post, LikePost, LikeComment, Comment
 from .forms import PostForm, CommentForm
-from profiles.models import Notification
 
 
 class CreatePostView(LoginRequiredMixin, CreateView):
@@ -20,6 +21,8 @@ class CreatePostView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+        if not (form.cleaned_data["description"] or form.cleaned_data["image"]):
+            return redirect(reverse_lazy("posts:list"))
         return super(CreatePostView, self).form_valid(form)
 
 

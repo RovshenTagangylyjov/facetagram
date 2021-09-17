@@ -1,15 +1,13 @@
 from django.db import models
 from django.conf import settings
-from django.db.models.expressions import OrderBy
 from django.urls import reverse
-from django.utils import timezone
 from helpers.image_compression import get_compressed_image_content
 
 
 class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     description = models.TextField(max_length=5000, null=True, blank=True)
-    image = models.ImageField(upload_to='posts')
+    image = models.ImageField(upload_to='posts', null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     location = models.CharField(max_length=50, null=True, blank=True)
 
