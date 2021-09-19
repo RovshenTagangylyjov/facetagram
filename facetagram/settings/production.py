@@ -1,9 +1,5 @@
-import dj_database_url
 from .base import *
 
-DEBUG = False
-
-ALLOWED_HOSTS = ["myfacetagram.herokuapp.com"]
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -17,11 +13,7 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-db_from_env = dj_database_url.config(conn_max_age=600)
-DATABASES['default'].update(db_from_env)
-
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
-
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
