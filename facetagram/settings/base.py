@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "+#9u-g^!*sc+(33#=v62t-zejm4qms90lh-)s!ir#_$y)g$c#"
+SECRET_KEY = '+#9u-g^!dsc+(33#=v]2tvzejm4scs90lh-)+!ir#w$y)g$c#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["myfacetagram.herokuapp.com"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Application definition
 
@@ -80,12 +80,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'facetagram.wsgi.application'
 
-import dj_database_url
-db_from_env = dj_database_url.config(conn_max_age=600)
 DATABASES = {
-    'default': db_from_env
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'facetagram',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -131,8 +134,6 @@ USE_TZ = True
 
 STATIC_URL = "/assets/"
 MEDIA_URL = "/media/"
-
-STATIC_ROOT = os.path.join(BASE_DIR, "assets")
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')

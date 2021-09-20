@@ -1,5 +1,13 @@
+import dj_database_url
+
 from .base import *
 
+
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+DEBUG = False
+
+ALLOWED_HOSTS = ["myfacetagram.herokuapp.com"]
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -15,13 +23,18 @@ SECURE_HSTS_PRELOAD = True
 
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
 
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'] = db_from_env
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+STATIC_ROOT = os.path.join(BASE_DIR, "assets")
 
 # Cloudinary configs
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": "disbvkli0", 
-    "API_KEY": "135669314646314", 
-    "API_SECRET": "1QCScCqCT2YuzzkSe8bm7nErIiE"
+    "CLOUD_NAME": os.getenv('CLOUD_NAME'), 
+    "API_KEY": os.getenv('API_KEY'), 
+    "API_SECRET": os.getenv('API_SECRET')
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
