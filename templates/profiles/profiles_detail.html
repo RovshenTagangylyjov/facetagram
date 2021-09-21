@@ -3,6 +3,7 @@
 {% load functions %}
 {% block title %}Profile Detail{% endblock %}
 {% block content %}
+{% request.user == profile as me %}
 <section class="profile-detail w-100 container-sm px-3 py-2 bg-white shadow">
     <div class="row p-3 pb-0">
         <div class="col-4 d-flex justify-content-center align-items-center">
@@ -44,7 +45,7 @@
     <div class="row p-3 pt-0">
         <p>{{profile.biography}}</p>
     </div>
-    {% if not request.user == profile %}
+    {% if not me %}
     <div class="d-flex justify-content-end p-2">
         {% if profile.is_friend %}
         {% generate_room_id request.user.pk profile.pk as room_id %}
@@ -59,7 +60,7 @@
     {% endif %}
 </section>
 
-{% if profile == request.user %}
+{% if me %}
 <nav class="position-fixed bottom-0 vw-100 shadow bg-white d-flex justify-content-center align-items-center">
     <div class="big-plus">
         <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><span class="fas fa-plus big-plus fa-4x"></span></button>
@@ -101,7 +102,7 @@
 {% endif %}
 
 <section class="d-flex flex-column mx-auto infinite-container mt-2 w-100 d-flex align-items-center" style="margin-bottom: 7em;">
-{% if profile == request.user  or request.user in profile.friends.all or not profile.is_private %}
+    {% if me  or request.user in profile.friends.all or not profile.is_private %}
     {% for post in posts %}
     <div class="card post bg-white m-0 py-2 my-1 infinite-item shadow" id="{{post.id}}">
         <div class="card-header d-flex align-items-center">
@@ -116,7 +117,9 @@
                 <div class="mb-2"></div>
                 {% endif %}
             </div>
+            {% if me %}
             <button class="btn btn-outline-danger justify-self-end delete fas fa-trash-alt" id="{{post.id}}"></button>
+            {% endif %}
         </div>
         <figure class="figure post-image card-img d-flex align-content-center justify-content-center m-auto" onclick="window.location='{% url 'posts:detail' post.pk %}'">
             <img src="{{post.image.url}}" alt="post" class="figure-img img-fluid mx-auto">
@@ -127,7 +130,7 @@
             {% endif %}  
             <div class="links d-flex justify-content-between mb-1 pt-0">
                 <div class="thumbs d-flex align-items-center">
-                <span class="btn icon-sm {% if post.is_liked %}fas text-primary{% else %}far{% endif %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
+                    <span class="btn icon-sm {% if post.is_liked %}fas text-primary{% else %}far{% endif %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
                     <span class="btn icon-sm {% if post.is_disliked %}fas text-danger{% else %}far{% endif %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
                 </div>
                 <div>
@@ -280,6 +283,6 @@
         })
         
     });
-    
+
 </script>
 {% endblock %}
