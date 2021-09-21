@@ -3,7 +3,7 @@
 {% load functions %}
 {% block title %}Profile Detail{% endblock %}
 {% block content %}
-{% request.user == profile as me %}
+{{request.user == profile as me}}
 <section class="profile-detail w-100 container-sm px-3 py-2 bg-white shadow">
     <div class="row p-3 pb-0">
         <div class="col-4 d-flex justify-content-center align-items-center">
@@ -167,7 +167,7 @@
 {% endif %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        
+
         deletePost = (event) => {
             let xhr = new XMLHttpRequest();
             xhr.open('POST', "{% url 'posts:delete' %}", true);
@@ -270,7 +270,7 @@
 
             },
             onAfterPageLoad: () => {
-                
+
                 document.querySelectorAll('.rate').forEach(rate => {
                     rate.addEventListener('click', sendRate);
                 })  
