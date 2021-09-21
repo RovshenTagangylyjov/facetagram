@@ -54,8 +54,13 @@ class ProfileListView(LoginRequiredMixin, ListView):
         is_friend = Exists(user.friends.filter(pk=OuterRef("pk")))
         is_waiting = Exists(Notification.objects.filter(sender=user, receiver_id=OuterRef("pk")))
         if filter == "friends":
-            return user.friends.filter(username__icontains=search).only('username', 'pk', 'avatar', 'id').annotate(is_friend=is_friend, is_waiting=is_waiting) 
-        return User.objects.filter(username__icontains=search).exclude(pk=user.pk).only('username', 'pk', 'avatar', 'id').annotate(is_friend=is_friend, is_waiting=is_waiting)
+            return user.friends.filter(username__icontains=search)\
+                .only('username', 'pk', 'avatar', 'id')\
+                .annotate(is_friend=is_friend, is_waiting=is_waiting)
+        return User.objects.filter(username__icontains=search)\
+            .exclude(pk=user.pk)\
+            .only('username', 'pk', 'avatar', 'id')\
+            .annotate(is_friend=is_friend, is_waiting=is_waiting)
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -78,7 +83,9 @@ class FriendRequest(LoginRequiredMixin, View):
         friend = get_object_or_404(User, id=body.get('profile_id'))
         value = body.get('value')
         is_friend = user.friends.filter(pk=friend.pk)
-        notification_exists = Notification.objects.filter(Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)).exists()
+        notification_exists = Notification.objects.filter(
+            Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
+        ).exists()
         if value == 'add' and is_friend:
             return JsonResponse({})
         elif value == 'add' and not (notification_exists or is_friend):
@@ -139,7 +146,9 @@ class JSONSearchProfile(LoginRequiredMixin, View):
         users = User.objects
         if friends:
             users = user.friends
-        return JsonResponse(list(users.filter(username__istartswith=search).exclude(pk=user.pk).values("id", "username")), safe=False)
+        qs = users.filter(username__istartswith=search).exclude(pk=user.pk)
+        context = list(qs.values("id", "username"))
+        return JsonResponse(context, safe=False)
 
 
 class JSONGetNotifications(LoginRequiredMixin, View):
@@ -148,4 +157,10 @@ class JSONGetNotifications(LoginRequiredMixin, View):
     def post(self, request):
         user = self.request.user
         body = json.loads(request.body)
-        return JsonResponse(list(user.receiver.filter(id__gt=body["last_notification_id"]).annotate(sender_username=F("sender__username"), sender_avatar=F("sender__avatar"), default_avatar=Value(static("img/default_avatar.png"))).values()), safe=False)
+        qs = user.receiver.filter(id__gt=body["last_notification_id"]).annotate(
+            sender_username=F("sender__username"),
+            sender_avatar=F("sender__avatar"),
+            default_avatar=Value(static("img/default_avatar.png"))
+        )
+        context = list(qs.values())
+        return JsonResponse(context, safe=False)

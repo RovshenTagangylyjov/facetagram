@@ -9,6 +9,11 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["myfacetagram.herokuapp.com"]
 
+INSTALLED_APPS += [
+    'cloudinary',
+    'cloudinary_storage',
+]
+
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = 15768000  # set low, but when site is ready for deployment, set to at least 15768000 (6 months)
@@ -24,7 +29,7 @@ SECURE_HSTS_PRELOAD = True
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
 
 db_from_env = dj_database_url.config(conn_max_age=600)
-DATABASES['default'] = db_from_env
+DATABASES['default'].update(db_from_env)
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

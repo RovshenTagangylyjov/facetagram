@@ -1,5 +1,5 @@
 import json
-from typing import List
+
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import ListView
@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
 from .models import Room, Message
-from profiles.models import Notification
 
 
 class ChatView(LoginRequiredMixin, ListView, SingleObjectMixin):
@@ -35,7 +34,8 @@ class ChatView(LoginRequiredMixin, ListView, SingleObjectMixin):
         return context
 
 
-class SendTextView(View):
+class SendTextView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
 
     def post(self, request):
         body = json.loads(request.body)
@@ -48,7 +48,9 @@ class SendTextView(View):
         return JsonResponse({})
 
 
-class GetTextView(View):
+class GetTextView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
     def post(self, request):
         body = json.loads(request.body)
         room = get_object_or_404(Room, room_id=body['room_id'])

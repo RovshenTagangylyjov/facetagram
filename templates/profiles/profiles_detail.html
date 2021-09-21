@@ -122,6 +122,9 @@
             <img src="{{post.image.url}}" alt="post" class="figure-img img-fluid mx-auto">
         </figure>
         <div class="card-body pb-1 pt-0">
+            {% if post.description %}
+            <p class="card-text fw-bold px-3 pt-1 my-1" onclick="window.location='{% url 'posts:detail' post.pk %}'">{{post.description}}</p>
+            {% endif %}  
             <div class="links d-flex justify-content-between mb-1 pt-0">
                 <div class="thumbs d-flex align-items-center">
                 <span class="btn icon-sm {% if post.is_liked %}fas text-primary{% else %}far{% endif %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
@@ -141,7 +144,7 @@
             {% endif %}     
         </div>
         <div class="card-footer text-muted text-end">
-            2 days ago
+            {{post.date_created}}
         </div>
     </div>
     <div class="pagination">

@@ -36,8 +36,8 @@ class PostListView(LoginRequiredMixin, ListView):
         user = self.request.user
         is_liked = Exists(LikePost.objects.filter(user=user, post_id=OuterRef("id"), value=1))
         is_disliked = Exists(LikePost.objects.filter(user=user, post_id=OuterRef("id"), value=-1))
-        return Post.objects.filter(Q(user__in=user.friends.all()) | Q(user=user) | Q(user__is_private=False)) \
-                    .annotate(is_liked=is_liked, is_disliked=is_disliked)
+        return Post.objects.filter(Q(user__in=user.friends.all()) | Q(user=user) | Q(user__is_private=False))\
+            .annotate(is_liked=is_liked, is_disliked=is_disliked)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -54,8 +54,8 @@ class PostDetailView(LoginRequiredMixin, DetailView):
         user = self.request.user
         is_liked = Exists(LikePost.objects.filter(user=user, post_id=OuterRef("id"), value=1))
         is_disliked = Exists(LikePost.objects.filter(user=user, post_id=OuterRef("id"), value=-1))
-        return Post.objects.filter(Q(user__in=user.friends.all()) | Q(user=user)) \
-                    .annotate(is_liked=is_liked, is_disliked=is_disliked)
+        return Post.objects.filter(Q(user__in=user.friends.all()) | Q(user=user))\
+            .annotate(is_liked=is_liked, is_disliked=is_disliked)
 
     def get_context_data(self, **kwargs):
         context = super(PostDetailView, self).get_context_data()
