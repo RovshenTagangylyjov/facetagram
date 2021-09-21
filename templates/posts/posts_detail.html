@@ -53,8 +53,8 @@
         <li class="list-group-item">
             <header class="d-flex justify-content-between align-items-center">
                     <a class="ms-1 link-dark text-decoration-none" href="{% url 'profiles:detail' comment.user.pk %}">
-                        <img class="i-avatar fs-3" src="{{comments.user.get_avatar_url}}" alt="avatar">
-                        <strong>{{ comment.user.username }}</strong>
+                        <img class="i-avatar fs-3" src="{{comment.user.get_avatar_url}}" alt="avatar">
+                        <strong>{{comment.user.username}}</strong>
                     </a>
                     <small>{{comment.date_created}}</small>
             </header>
