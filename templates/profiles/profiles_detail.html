@@ -120,9 +120,11 @@
             <button class="btn btn-outline-danger justify-self-end delete fas fa-trash-alt" id="{{post.id}}"></button>
             {% endif %}
         </div>
+        {% if post.image %}
         <figure class="figure post-image card-img d-flex align-content-center justify-content-center m-auto" onclick="window.location='{% url 'posts:detail' post.pk %}'">
             <img src="{{post.image.url}}" alt="post" class="figure-img img-fluid mx-auto">
         </figure>
+        {% endif %}
         <div class="card-body pb-1 pt-0">
             {% if post.description %}
             <p class="card-text fw-bold px-3 pt-1 my-1" onclick="window.location='{% url 'posts:detail' post.pk %}'">{{post.description}}</p>

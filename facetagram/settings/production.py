@@ -5,7 +5,7 @@ from .base import *
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["myfacetagram.herokuapp.com"]
 
