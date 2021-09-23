@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Post Detail{% endblock %}
+
+{% block extra_headers %}
+<script src="{% static 'js/custom/rate.js' %}"></script>
+{% if request.user == post.user %}
+<script src="{% static 'js/custom/delete_post.js' %}"></script>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="detail card post bg-white my-4 mx-auto shadow" id="{{post.id}}">
     <div class="card-header d-flex align-items-center">
@@ -15,6 +24,9 @@
             <div class="mb-2"></div>
             {% endif %}
         </div>
+        {% if request.user == post.user %}
+        <button class="btn btn-outline-danger justify-self-end delete fas fa-trash-alt" id="{{post.id}}"></button>
+        {% endif %}
     </div>
     {% if post.image %}
     <figure class="figure post-image card-img d-flex align-content-center justify-content-center m-auto" onclick="window.location='{% url 'posts:detail' post.pk %}'">
@@ -52,11 +64,11 @@
         {% for comment in comments %}
         <li class="list-group-item">
             <header class="d-flex justify-content-between align-items-center">
-                    <a class="ms-1 link-dark text-decoration-none" href="{% url 'profiles:detail' comment.user.pk %}">
-                        <img class="i-avatar fs-3" src="{{comment.user.get_avatar_url}}" alt="avatar">
-                        <strong>{{comment.user.username}}</strong>
-                    </a>
-                    <small>{{comment.date_created}}</small>
+                <a class="ms-1 link-dark text-decoration-none" href="{% url 'profiles:detail' comment.user.pk %}">
+                    <img class="i-avatar fs-3" src="{{comment.user.get_avatar_url}}" alt="avatar">
+                    <strong>{{comment.user.username}}</strong>
+                </a>
+                <small>{{comment.date_created}}</small>
             </header>
             <p class="p-0 m-0 py-3 mx-3">{{comment.text}}</p>
             <footer>
@@ -70,77 +82,4 @@
     </ul>
     {% endif %}
 </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        trashes = document.querySelectorAll('.delete');
-        trashes.forEach((trash) => {
-            trash.addEventListener('click', (event) => {
-                let xhr = new XMLHttpRequest();
-                xhr.open('POST', "{% url 'posts:delete' %}", true);
-                xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(JSON.stringify({ id: event.target.id }));
-                xhr.onreadystatechange = () => window.location = "{% url 'posts:list' %}"
-            });
-        });
-
-        sendRate = (event) => {
-            if (event.target.classList.contains("post-rate")){
-                type = "post"
-            } else{
-                type = "comment"
-            }
-            let xhr = new XMLHttpRequest();
-            let thumbs;
-            if (type == "post"){
-                xhr.open('POST', "{% url 'posts:like_post' %}", true);
-                thumbs = document.querySelectorAll('.p' + event.target.id);
-            } else{
-                xhr.open('POST', "{% url 'posts:like_comment' %}", true);
-                thumbs = document.querySelectorAll('.c' + event.target.id);
-            }
-            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            if (event.target.classList.contains('like')) {
-                if (event.target.classList.contains('fas')) {
-                    event.target.classList.remove('fas', 'text-primary');
-                    event.target.classList.add('far');
-                    value = 0;
-                } else {
-                    event.target.classList.add('fas', 'text-primary');
-                    value = 1;
-                    if (thumbs[1].classList.contains('fas')) {
-                        thumbs[1].classList.remove('fas', 'text-danger');
-                    }
-                }
-            } else {
-                if (event.target.classList.contains('fas')) {
-                    event.target.classList.remove('fas', 'text-danger');
-                    event.target.classList.add('far');
-                    value = 0;
-                } else {
-                    event.target.classList.add('fas', 'text-danger');
-                    value = -1;
-                    if (thumbs[0].classList.contains('fas')) {
-                        thumbs[0].classList.remove('fas', 'text-primary');
-                    }
-                }
-            }
-            xhr.send(JSON.stringify({ id: event.target.id, value: value }));
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState != 4) return;
-                if (xhr.status == 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    thumbs[0].textContent = data['likes'];
-                    thumbs[1].textContent = data['dislikes'];
-                }
-            };
-        };
-        document.querySelectorAll('.rate').forEach((rate) => {
-            rate.addEventListener('click',  sendRate);
-        });
-    });
-</script>
 {% endblock %}

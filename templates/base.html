@@ -16,17 +16,98 @@
     <script src="{% static 'js/infinite.min.js' %}"></script>
     {% if request.user.is_authenticated %}
     <link rel="stylesheet" href="{% static 'css/custom/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom/nav.css' %}">
+    <script src="{% static 'js/custom/variables.js' %}"></script>
+    <script src="{% static 'js/custom/nav.js' %}"></script>
     {% endif %}
+    {% block extra_headers %}{% endblock %}
+    {% block js %}{% endblock %}
 </head>
 
 <body>
     {% if request.user.is_authenticated %}
-    {% include 'nav.html' %}
-    {% endif %}
+    <nav class="navbar navbar-expand-sm navbar-primary bg-white position-sticky top-0 py-0">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">facetagram</a>
+            <button class="navbar-toggler btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="fas fa-bars icon-lg"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav flex-row justify-content-evenly justify-content-sm-end align-items-center w-100">
+                    <li class="nav-item profiles p-1 my-1 me-1">
+                        <a href="{% url 'profiles:list' %}" title="Find users" class="fas fa-search nav-link p-1 icon-lg"
+                        title="Find new friends"></a>
+                    </li>
+                    <li class="nav-item friends p-1 my-1 me-1">
+                        <a href="{% url 'profiles:list' %}?filter=friends" title="Friends" class="fas fa-user-friends nav-link p-1 icon-lg" title="My friends"></a>
+                    </li>
+                    <li class="nav-item home p-1 my-1 me-1">
+                        <a href="{% url 'posts:list' %}" title="Home Page" class="fas fa-home nav-link p-1 icon-lg"></a>
+                    </li>
+                    <li class="nav-item dropstart p-1 me-1">
+                        <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false"><img src="{{request.user.get_avatar_url}}" alt="avatar"
+                        class="i-avatar"></a>
+                        <ul class="dropdown-menu position-absolute" aria-labelledby="userDropdown" style="z-index: 1;">
+                            <li>
+                                <a href="{% url 'profiles:detail' request.user.pk %}"
+                                class="dropdown-item text-primary">Profile</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'profiles:update' request.user.pk %}" class="dropdown-item text-primary">Update Profile</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a href="{% url 'authenticate:logout' %}" class="dropdown-item text-danger">Log Out</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item p-1 me-2">
+                        <a class="nav-link fas fa-bell icon-lg p-0 position-relative" data-bs-toggle="offcanvas" href="#notifications" role="button" aria-controls="notifications">
+                            <span class="d-none position-absolute text-white bg-danger top-0 end-0 px-1 notification-count" style="border-radius: 50%; font-size: .7em;"></span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="notifications" aria-labelledby="offcanvasExampleLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasExampleLabel">Notifications</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body m-auto">
+            <div class="toast-container">
+                {% for notification in notifications %}
+                <div class="toast show toast{{notification.id}}" role="alert" aria-live="assertive" aria-atomic="true" id="{{notification.id}}">
+                    <div class="toast-header">
+                        <a href="{% url 'profiles:detail' notification.sender.id %}" class="user" id="{{notification.sender.id}}">
+                            <img src="{{notification.sender.get_avatar_url}}" class="rounded me-2 avatar" alt="avatar">
+                        </a>
+                        <strong class="me-auto">{{notification.sender.username}}</strong>
+                        <small class="text-muted">{{notification.date_created}}</small>
+                    </div>
+                    <div class="toast-body">
+                        Friend request
+                        <div class="mt-3 pt-3 border-top d-flex justify-content-evenly">
+                            <button class="btn btn-primary w-50 accept" id="{{notification.id}}">Accept</button>
+                            <button class="btn btn-secondary w-50 ms-3 deny" id="{{notification.id}}">Deny</button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <h5 class="text-muted mt-3 mx-auto">No notifications</h5>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
     {% block content %}
     {% endblock %}
-    
 </body>
 
 </html>

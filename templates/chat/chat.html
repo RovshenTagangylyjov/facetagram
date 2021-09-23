@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
+
 {% block title %}Chat{% endblock %}
+
 {% load static %}
-{% block content %}
+
+{% block extra_headers %}
 <style>
     .messages, .message{
         transform: rotate(180deg);
@@ -9,6 +12,9 @@
         direction: rtl;
     }
 </style>
+{% endblock %}
+
+{% block content %}
 <div class="chat m-auto mt-3 bg-white rounded-3 shadow d-flex flex-column">
     <div class="infinite-container py-3 w-100 h-100 messages d-flex flex-column px-3">
         {% for message in messages %}
@@ -40,6 +46,9 @@
         </button>
     </div>
 </div>
+{% endblock %}
+
+{% block js %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         sendText = () => {
@@ -107,7 +116,5 @@
             },
         });
     });
-    
 </script>
-
 {% endblock %}

@@ -1,8 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load functions %}
+
 {% block title %}Profile Detail{% endblock %}
+
+{% block extra_headers %}
+{% if not request.user == profile %}     
+<script src="{% static 'js/custom/friend_request.js' %}"></script>
+{% endif %}
+<script src="{% static 'js/custom/rate.js' %}"></script>
+<script src="{% static 'js/custom/delete_post.js' %}"></script>
+<script src="{% static 'js/custom/create_post.js' %}"></script>
+{% endblock %}
+
 {% block content %}
+
+{% if profile == request.user %}
+{% include 'create_post.html' %}
+{% endif %}
+
 <section class="profile-detail w-100 container-sm px-3 py-2 bg-white shadow">
     <div class="row p-3 pb-0">
         <div class="col-4 d-flex justify-content-center align-items-center">
@@ -58,50 +74,8 @@
     </div>
     {% endif %}
 </section>
-
-{% if profile == request.user %}
-<nav class="position-fixed bottom-0 vw-100 shadow bg-white d-flex justify-content-center align-items-center">
-    <div class="big-plus">
-        <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><span class="fas fa-plus big-plus fa-4x"></span></button>
-    </div>
-</nav>
-<form method="POST" action="{% url 'posts:create' %}"  class="modal fade" id="add-post" tabindex="-1" aria-labelledby="add-post" aria-hidden="true" enctype="multipart/form-data">{% csrf_token  %}
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content mx-3">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add Post</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <figure class="figure post-image mb-3 d-none" id="post-figure">
-                    <div class="bg-image"></div>
-                    <div class="blur"></div>
-                    <img alt="post" id='post-img' class="position-absolute start-50 top-50 translate-middle">
-                </figure>
-                <div class="mb-3">
-                    <label class="fw-bold" for="image" class="col-form-label">Select Image:</label>
-                    <input type="file" class="form-control" name="image" accept="img/*" required id="post-input">
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold" for="location" class="col-form-label">Location:</label>
-                    <input type="text" class="form-control" name="location" maxlength="50">
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold" for="description" class="col-form-label">Description:</label>
-                    <textarea class="form-control" name="description"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Post</button>
-            </div>
-        </div>
-    </div>
-</form>
-{% endif %}
-
 <section class="d-flex flex-column mx-auto infinite-container mt-2 w-100 d-flex align-items-center" style="margin-bottom: 7em;">
-{% if profile == request.user  or request.user in profile.friends.all or not profile.is_private %}
+    {% if profile == request.user  or request.user in profile.friends.all or not profile.is_private %}
     {% for post in posts %}
     <div class="card post bg-white m-0 py-2 my-1 infinite-item shadow" id="{{post.id}}">
         <div class="card-header d-flex align-items-center">
@@ -131,7 +105,7 @@
             {% endif %}  
             <div class="links d-flex justify-content-between mb-1 pt-0">
                 <div class="thumbs d-flex align-items-center">
-                <span class="btn icon-sm {% if post.is_liked %}fas text-primary{% else %}far{% endif %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
+                    <span class="btn icon-sm {% if post.is_liked %}fas text-primary{% else %}far{% endif %} fa-thumbs-up rate like p{{post.id}}" id="{{post.id}}">{{post.get_like_count}}</span>
                     <span class="btn icon-sm {% if post.is_disliked %}fas text-danger{% else %}far{% endif %} fa-thumbs-down rate dislike p{{post.id}}" id="{{post.id}}">{{post.get_dislike_count}}</span>
                 </div>
                 <div>
@@ -161,124 +135,28 @@
     </h1>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block js %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        
-        deletePost = (event) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', "{% url 'posts:delete' %}", true);
-            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({ id: event.target.id }));
-            document.getElementById(event.target.id).remove();
-        }
-        
-        sendRate = (event) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', "{% url 'posts:like_post' %}", true);
-            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            const thumbs = document.querySelectorAll('.p' + event.target.id);
-            if (event.target.classList.contains('like')) {
-                if (event.target.classList.contains('fas')) {
-                    event.target.classList.remove('fas', 'text-primary');
-                    event.target.classList.add('far');
-                    value = 0;
-                } else {
-                    event.target.classList.add('fas', 'text-primary');
-                    value = 1;
-                    if (thumbs[1].classList.contains('fas')) {
-                        thumbs[1].classList.remove('fas', 'text-danger');
-                    }
-                }
-            } else {
-                if (event.target.classList.contains('fas')) {
-                    event.target.classList.remove('fas', 'text-danger');
-                    event.target.classList.add('far');
-                    value = 0;
-                } else {
-                    event.target.classList.add('fas', 'text-danger');
-                    value = -1;
-                    if (thumbs[0].classList.contains('fas')) {
-                        thumbs[0].classList.remove('fas', 'text-primary');
-                    }
-                }
-            }
-            xhr.send(JSON.stringify({ id: event.target.id, value: value }));
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState != 4) return;
-                if (xhr.status == 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    thumbs[0].textContent = data['likes'];
-                    thumbs[1].textContent = data['dislikes'];
-                }
-            };
-        };
-
-        {% if not request.user == profile %}
-        friendRequest = (event) => {
-            let value = 0;
-            if (event.target.classList.contains('add')){
-                value = 'add';
-                event.target.classList.remove('add', 'btn-primary', 'fa-user-plus');
-                event.target.classList.add('cancel', 'btn-warning', 'fa-user-minus');
-            } else if(event.target.classList.contains('remove')){
-                value = 'remove';
-                event.target.classList.remove('remove', 'btn-danger', 'fa-user-minus');
-                event.target.classList.add('add', 'btn-primary', 'fa-user-plus');
-                document.querySelector(`#link${event.target.id}`).remove();
-            } else{
-                value = 'cancel';
-                event.target.classList.remove('cancel', 'btn-warning', 'fa-user-minus');
-                event.target.classList.add('add', 'btn-primary', 'fa-user-plus');
-            };
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', "{% url 'profiles:friend_request' %}", true);
-            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({ profile_id: event.target.id, value: value }));
-        };
-        
+        {% if not request.user == profile %}     
         document.querySelector(".request").addEventListener("click", friendRequest);
         {% endif %}
-
-        {% if profile == request.user %}
-        document.getElementById('post-input').addEventListener('change', (event) => {
-            figure = document.getElementById('post-figure');
-            figure.classList.remove('d-none');
-            img = figure.querySelector('#post-img');
-            img.src = URL.createObjectURL(event.target.files[0]);
-        });
-        {% endif %}
-        
-        document.querySelectorAll('.rate').forEach(rate => {
-            rate.addEventListener('click', sendRate);
-        })  
-        
-        document.querySelectorAll('.delete').forEach((btn) => {
-            btn.addEventListener('click', deletePost);
-        })
-        
         var infinite = new Waypoint.Infinite({
             element: $('.infinite-container')[0],
             offset: 'bottom-in-view',
             onBeforePageLoad: () => {
-
             },
             onAfterPageLoad: () => {
-                
-                document.querySelectorAll('.rate').forEach(rate => {
-                    rate.addEventListener('click', sendRate);
-                })  
-                
+                document.querySelectorAll('.rate').forEach((rate) => {
+                    rate.addEventListener('click',  sendRate);
+                });  
                 document.querySelectorAll('.delete').forEach((btn) => {
                     btn.addEventListener('click', deletePost);
-                })
-                
+                });
             },
-        })
-        
+        });
     });
-    
 </script>
-{% endblock %}
+{% endblock js %}

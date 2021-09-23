@@ -1,44 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Post List{% endblock %}
-{% block content %}
-<nav class="position-fixed bottom-0 vw-100 shadow bg-white d-flex justify-content-center align-items-center">
-    <div class="big-plus">
-        <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><span class="fas fa-plus big-plus fa-4x"></span></button>
-    </div>
-</nav>
-<form method="POST" action="{% url 'posts:create' %}"  class="modal fade" id="add-post" tabindex="-1" aria-labelledby="add-post" aria-hidden="true" enctype="multipart/form-data">{% csrf_token  %}
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content mx-3">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add Post</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <figure id="post-figure" class="figure post-image d-none align-content-center justify-content-center m-auto">
-                    <img alt="post" id="post-img" class="figure-img img-fluid mx-auto">
-                </figure>
-                <div class="mb-3">
-                    <label class="fw-bold" for="image" class="col-form-label">Select Image:</label>
-                    <input type="file" class="form-control" name="image" accept="img/*" id="post-input">
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold" for="location" class="col-form-label">Location:</label>
-                    <input type="text" class="form-control" name="location" maxlength="50">
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold" for="description" class="col-form-label">Description:</label>
-                    <textarea class="form-control" name="description"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Post</button>
-            </div>
-        </div>
-    </div>
-</form>
 
+{% block title %}Post List{% endblock %}
+
+{% block extra_headers %}
+<script src="{% static 'js/custom/rate.js' %}"></script>
+<script src="{% static 'js/custom/create_post.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+{% include 'create_post.html' %}
 <section class="d-flex flex-column mx-auto infinite-container mt-2 w-100 d-flex align-items-center" style="margin-bottom: 7em;">
     {% for post in posts %}
     <div class="card post bg-white m-0 py-2 my-1 infinite-item shadow" id="{{post.id}}">
@@ -90,63 +61,12 @@
     <h5 class="text-center text-muted mt-5">No posts</h5>
     {% endfor %}
 </section>
+{% endblock %}
+
+{% block js %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.home').classList.add('current-page');
-        document
-        .getElementById('post-input')
-        .addEventListener('change', (event) => {
-            figure = document.getElementById('post-figure');
-            figure.classList.remove('d-none');
-            figure.classList.add('d-flex');
-            img = figure.querySelector('#post-img');
-            img.src = URL.createObjectURL(event.target.files[0]);
-        });
-
-        sendRate = (event) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', "{% url 'posts:like_post' %}", true);
-            xhr.setRequestHeader('X-CSRFToken', '{{csrf_token}}');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            const thumbs = document.querySelectorAll('.p' + event.target.id);
-            if (event.target.classList.contains('like')) {
-                if (event.target.classList.contains('fas')) {
-                    event.target.classList.remove('fas', 'text-primary');
-                    event.target.classList.add('far');
-                    value = 0;
-                } else {
-                    event.target.classList.add('fas', 'text-primary');
-                    value = 1;
-                    if (thumbs[1].classList.contains('fas')) {
-                        thumbs[1].classList.remove('fas', 'text-danger');
-                    }
-                }
-            } else {
-                if (event.target.classList.contains('fas')) {
-                    event.target.classList.remove('fas', 'text-danger');
-                    event.target.classList.add('far');
-                    value = 0;
-                } else {
-                    event.target.classList.add('fas', 'text-danger');
-                    value = -1;
-                    if (thumbs[0].classList.contains('fas')) {
-                        thumbs[0].classList.remove('fas', 'text-primary');
-                    }
-                }
-            }
-            xhr.send(JSON.stringify({ id: event.target.id, value: value }));
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState != 4) return;
-                if (xhr.status == 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    thumbs[0].textContent = data['likes'];
-                    thumbs[1].textContent = data['dislikes'];
-                }
-            };
-        };
-        document.querySelectorAll('.rate').forEach((rate) => {
-            rate.addEventListener('click',  sendRate);
-        });
         var infinite = new Waypoint.Infinite({
             element: $('.infinite-container')[0],
             offset: 'bottom-in-view',
@@ -155,10 +75,9 @@
             onAfterPageLoad: () => {
                 document.querySelectorAll('.rate').forEach((rate) => {
                     rate.addEventListener('click',  sendRate);
-                });  
+                });
             },
-        })
-        
+        });
     });
 </script>
 {% endblock %}

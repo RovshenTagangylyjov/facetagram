@@ -1,0 +1,36 @@
+<nav class="position-fixed bottom-0 vw-100 shadow bg-white d-flex justify-content-center align-items-center">
+    <div class="big-plus">
+        <button data-bs-toggle="modal" title="Add Post" data-bs-target="#add-post" class="btn"><span class="fas fa-plus big-plus fa-4x"></span></button>
+    </div>
+</nav>
+<form method="POST" action="{% url 'posts:create' %}"  class="modal fade" id="add-post" tabindex="-1" aria-labelledby="add-post" aria-hidden="true" enctype="multipart/form-data">{% csrf_token  %}
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content mx-3">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Post</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <figure id="post-figure" class="figure post-image d-none align-content-center justify-content-center m-auto">
+                    <img alt="post" id="post-img" class="figure-img img-fluid mx-auto">
+                </figure>
+                <div class="mb-3">
+                    <label class="fw-bold" for="image" class="col-form-label">Select Image:</label>
+                    <input type="file" class="form-control" name="image" accept="img/*" id="post-input">
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold" for="location" class="col-form-label">Location:</label>
+                    <input type="text" class="form-control" name="location" maxlength="50">
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold" for="description" class="col-form-label">Description:</label>
+                    <textarea class="form-control" name="description"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Post</button>
+            </div>
+        </div>
+    </div>
+</form>

@@ -24,7 +24,7 @@ class User(AbstractUser):
     biography = models.TextField(max_length=10000, null=True, blank=True)
     avatar = models.ImageField(upload_to='avatars', null=True, blank=True)
     is_private = models.BooleanField(default=False, blank=True)
-    friends = models.ManyToManyField("self", null=True, blank=True)
+    friends = models.ManyToManyField("self", blank=True)
 
     def get_age(self):
         today = datetime.date.today()

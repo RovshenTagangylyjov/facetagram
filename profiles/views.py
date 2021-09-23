@@ -99,7 +99,7 @@ class FriendRequest(LoginRequiredMixin, View):
         return JsonResponse({})
 
 
-class CreateFriendshipView(LoginRequiredMixin, View):
+class AcceptFriendRequestView(LoginRequiredMixin, View):
     http_method_names = ['post']
 
     def post(self, request):
@@ -116,22 +116,6 @@ class CreateFriendshipView(LoginRequiredMixin, View):
         user.friends.add(friend)
         notification = get_object_or_404(Notification, id=body['notification'])
         notification.delete()
-        return JsonResponse({})
-
-
-class EndFriendshipView(LoginRequiredMixin, View):
-    http_method_names = ["post"]
-
-    def post(self, request):
-        body = json.load(request.body)
-        user = request.user
-        if body["pk"] == user.pk:
-            raise PermissionDenied
-        try:
-            friend = get_object_or_404(User, pk=body["pk"])
-            user.friends.remove(friend)
-        except  ObjectDoesNotExist:
-            return JsonResponse({})
         return JsonResponse({})
 
 

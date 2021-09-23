@@ -108,7 +108,7 @@ class DeletePostView(LoginRequiredMixin, View):
         return JsonResponse({})
 
 
-class LikePostView(LoginRequiredMixin, View):
+class RatePostView(LoginRequiredMixin, View):
     http_method_names = ['post']
 
     def post(self, request):
@@ -125,7 +125,7 @@ class LikePostView(LoginRequiredMixin, View):
         return HttpResponse(json.dumps(context), content_type='application/json')
 
 
-class LikeCommentView(LoginRequiredMixin, View):
+class RateCommentView(LoginRequiredMixin, View):
     http_method_names = ['post']
 
     def post(self, request):

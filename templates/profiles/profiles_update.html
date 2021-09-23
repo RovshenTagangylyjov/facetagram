@@ -1,15 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}facetagram{% endblock %}
-{% block content %}
+
+{% block extra_headers %}
 <style>
     .avatar {
         border-radius: 50%;
         width: 10em;
         height: 10em;
     }
-
 </style>
+{% endblock %}
+
+{% block content %}
 <form method="POST" class="container-sm my-5" enctype="multipart/form-data"> {% csrf_token %}
     <div class="row justify-content-center flex-column flex-md-row">
         <div class="col order-1 order-md-0">
@@ -107,13 +111,14 @@
     </div>
 
 </form>
+{% endblock %}
+
+{% block js %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('avatar-input').addEventListener('change', event => {
             document.getElementById('avatar').src = URL.createObjectURL(event.target.files[0]);
         })
     })
-
-
 </script>
 {% endblock %}
