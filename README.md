@@ -87,10 +87,10 @@ _If you have any issues with the virtual environment installation on Linux pleas
 ### For Windows
 ```
 $ python -m pip install --user virtualenv
-$ mkdir /makalam_env
-$ cd /makalam_env
-$ python -m venv /makalam_env
-$ /makalam_env/Scripts/activate
+$ mkdir /facetagram_env
+$ cd /facetagram_env
+$ python -m venv /facetagram_env
+$ /facetagram_env/Scripts/activate
 ```
 _If you have any issues with the virtual environment installation on Windows please check [this](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)_
 
