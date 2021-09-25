@@ -23,6 +23,10 @@ html {
 	min-height: 30em;
 }
 
+.post-image{
+	cursor: pointer;
+}
+
 .big-plus {
 	z-index: 10;
 	background: linear-gradient(

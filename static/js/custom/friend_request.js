@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event.target.classList.remove('add', 'btn-primary', 'fa-user-plus');
             event.target.classList.add('cancel', 'btn-warning', 'fa-user-minus');
         } else if(event.target.classList.contains('remove')){
+            if (!confirm("Are you sure you want to remove this person from your friends list?")) return;
             value = 'remove';
             event.target.classList.remove('remove', 'btn-danger', 'fa-user-minus');
             event.target.classList.add('add', 'btn-primary', 'fa-user-plus');

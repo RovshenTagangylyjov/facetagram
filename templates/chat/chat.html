@@ -41,7 +41,7 @@
         </div>   
     </div>
     <div class="input-group w-100">
-        <input type="text" class="form-control" placeholder="Type..." id="text" autofocus>
+        <input type="text" class="form-control" placeholder="Type..." id="text" autofocus autocomplete="off">
         <button type="submit" class="btn btn-outline-primary bg-white input-group-text fas fa-arrow-alt-circle-right" id="send">
         </button>
     </div>
@@ -88,16 +88,19 @@
                                     <a href="{% url 'profiles:detail' request.user.id %}">
                                         <img src="{{ request.user.get_avatar_url }}" alt="avatar" class="avatar">
                                     </a>
-                                    <p class="text bg-primary text-white py-1 px-2 fw-bold rounded-3">${data[i].text}</p>
+                                    <p class="text bg-primary text-white py-1 px-2 fw-bold rounded-3"></p>
                                 </div>` + messages.innerHTML
                             }else{
                                 messages.innerHTML =  `<div class="align-self-start my-1 infinite-item message d-flex flex-nowrap justify-content-end" id="${data[i].id}">
-                                    <p class="text bg-secondary text-white py-1 px-2 fw-bold rounded-3">${data[i].text}</p>
+                                    <p class="text bg-secondary text-white py-1 px-2 fw-bold rounded-3"></p>
                                     <a href="{% url 'profiles:detail' friend.id %}" class="">
                                         <img src="{{ friend.get_avatar_url }}" alt="avatar" class="avatar">
                                     </a>
                                 </div>` + messages.innerHTML
                             }
+                            messages.firstChild
+                            .querySelector('p')
+                            .textContent = data[i].text
                         }
                     }
                 }
