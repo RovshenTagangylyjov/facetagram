@@ -4,11 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let path = ratePostPath;
         let thumbs = document.querySelectorAll('.p' + event.target.id);
         if (event.target.classList.contains('comment-rate')){
-            console.log('aloooohhaaaaa')
             path = rateCommentPath;
             thumbs = document.querySelectorAll('.c' + event.target.id);
         }
-        console.log(thumbs);
         xhr.open('POST', path, true);
         xhr.setRequestHeader('X-CSRFToken', csrfToken);
         xhr.setRequestHeader('Content-Type', 'application/json');
