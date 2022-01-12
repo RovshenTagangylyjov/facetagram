@@ -25,7 +25,6 @@ Facetagram is my personal project where you can make new friends, share your pho
 * [PostgreSQL](https://www.postgresql.org/)
 ### Deployment
 * Deployed on [Heroku](https://www.heroku.com/)
-* Static files storage [**Whitenoise**](http://whitenoise.evans.io/)
 * Media files storage [**Cloudinary**](https://cloudinary.com/)
 ## **Setup**
 
