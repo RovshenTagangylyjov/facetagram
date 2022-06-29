@@ -1,5 +1,5 @@
 # [facetagram](myfacetagram.herokuapp.com)
-Facetagram is my personal project where you can make new friends, share your photos and communicate with them.  
+Facetagram is my personal project where you can make new friends, share your photos and chat with them.  
 ## Feautures
 * Authenticate
 * Send and accept friend requests
@@ -9,23 +9,6 @@ Facetagram is my personal project where you can make new friends, share your pho
 * Like and dislike comments
 * Chat
 
-## Languages, frameworks and libraries
-### Frontend
-* [Html](https://developer.mozilla.org/en-US/docs/Web/HTML)
-* [Css](https://developer.mozilla.org/en-US/docs/Web/CSS)
-* [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-* [Bootstrap 5](https://getbootstrap.com/docs/5.0/getting-started/introduction/)
-* [Font Awesome](https://fontawesome.com/)
-* [JQuery](https://jquery.com/)
-* [InfiniteJs](https://airbnb.io/infinity/)
-* [Waypoints](http://imakewebthings.com/waypoints/)
-### Backend
-* [Python](https://www.python.org/)
-* [Django](https://www.djangoproject.com/)
-* [PostgreSQL](https://www.postgresql.org/)
-### Deployment
-* Deployed on [Heroku](https://www.heroku.com/)
-* Media files storage [**Cloudinary**](https://cloudinary.com/)
 ## **Setup**
 
 __Make sure that you have python3 setup that can be referenced with command python to easily follow the tutorial. If your python is refernced with python3, then replace all pythons with python3__
